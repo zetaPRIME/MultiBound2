@@ -21,6 +21,16 @@ QString Instance::displayName() {
     return json["info"].toObject()["name"].toString(path);
 }
 
+QString Instance::workshopId() {
+    auto info = json["info"].toObject();
+    auto id = info["workshopId"].toString();
+    if (id.isEmpty()) {
+        auto f = QString::SectionSkipEmpty;
+        id = info["workshopLink"].toString().section("id=", 1, 1, f).section('&', 0, 0, f); // extract only id parameter
+    }
+    return id;
+}
+
 QString Instance::evaluatePath(const QString& p) {
     auto f = QString::SectionSkipEmpty;
     auto pfx = p.section(':', 0, 0, f);

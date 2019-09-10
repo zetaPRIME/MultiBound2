@@ -16,6 +16,7 @@ namespace MultiBound {
         ~Instance() = default;
 
         QString displayName();
+        QString workshopId();
 
         QString evaluatePath(const QString&);
         bool load();
