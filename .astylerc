@@ -1,0 +1,5 @@
+# attached braces
+style=attach
+indent-namespaces
+keep-one-line-blocks
+indent-labels

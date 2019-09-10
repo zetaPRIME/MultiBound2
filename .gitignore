@@ -1,0 +1,11 @@
+# ignore build artifacts
+build-*/*
+*.o
+
+# user config
+*.codekit
+*.pro.user
+*.pro.user.*
+*.stash
+*.autosave
+
