@@ -46,10 +46,12 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::refresh() {
-    QString selName;
-    if (auto sel = ui->instanceList->selectedItems(); sel.count() > 0) selName = sel[0]->text();
+    QString selPath;
+    if (auto sel = ui->instanceList->selectedItems(); sel.count() > 0) selPath = instanceFromItem(sel[0])->path;
 
     ui->instanceList->clear();
+
+    QListWidgetItem* selItm = nullptr;
 
     // load instances
     instances.clear();
@@ -62,7 +64,10 @@ void MainWindow::refresh() {
         instances.push_back(inst);
         auto itm = new QListWidgetItem(inst->displayName(), ui->instanceList);
         itm->setData(Qt::UserRole, QVariant::fromValue(static_cast<void*>(inst.get())));//reinterpret_cast<qintptr>(inst.get()));
+        if (inst->path == selPath) selItm = itm;
     }
+
+    if (selItm) ui->instanceList->setCurrentRow(ui->instanceList->row(selItm));
 
 }
 
