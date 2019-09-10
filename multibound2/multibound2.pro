@@ -37,8 +37,17 @@ HEADERS += $$files(*.h, true) \
            $$files(*.hpp, true)
 FORMS += $$files(*.ui, true)
 
+CONFIG += link_pkgconfig
+PKGCONFIG += libxml++-3.0
+
 # external deps
-unix:!android: LIBS += -L/usr/local/lib -lxml2
+unix {
+  # INCLUDEPATH += "/usr/include/glibmm-2.4"
+  #INCLUDEPATH += "/usr/include/libxml2"
+  #INCLUDEPATH += "/usr/include/libxml++-3.0"
+  #LIBS += -L/usr/local/lib -lxml2
+  #LIBS += $(pkg-config --cflags --libs libxml2)
+}
 # TODO: figure out what to do for this on windows??
 
 # Default rules for deployment.

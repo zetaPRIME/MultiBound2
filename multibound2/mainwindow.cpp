@@ -4,6 +4,8 @@
 #include "data/config.h"
 #include "data/instance.h"
 
+#include "util.h"
+
 #include <memory>
 
 #include <QDebug>
@@ -26,6 +28,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->launchButton, &QPushButton::pressed, this, [this] { launch(); });
     connect(ui->instanceList, &QListWidget::doubleClicked, this, [this](const QModelIndex& ind) { if (ind.isValid()) launch(); });
+
+    connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this] {
+        // testing
+        if (auto sel = ui->instanceList->selectedItems(); sel.count() > 0) {
+            auto csf = instanceFromItem(sel[0]);
+            setEnabled(false);
+            Util::updateFromWorkshop(csf);
+            setEnabled(true);
+            refresh();
+        }
+    });
 
     refresh();
 }

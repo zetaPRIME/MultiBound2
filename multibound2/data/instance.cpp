@@ -24,10 +24,7 @@ QString Instance::displayName() {
 QString Instance::workshopId() {
     auto info = json["info"].toObject();
     auto id = info["workshopId"].toString();
-    if (id.isEmpty()) {
-        auto f = QString::SectionSkipEmpty;
-        id = info["workshopLink"].toString().section("id=", 1, 1, f).section('&', 0, 0, f); // extract only id parameter
-    }
+    if (id.isEmpty()) id = Util::workshopIdFromLink(info["workshopLink"].toString());
     return id;
 }
 
