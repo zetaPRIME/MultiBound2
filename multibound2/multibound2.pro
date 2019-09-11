@@ -37,18 +37,10 @@ HEADERS += $$files(*.h, true) \
            $$files(*.hpp, true)
 FORMS += $$files(*.ui, true)
 
+# external deps
+# TODO (maybe): figure out what to do for this on windows??
 CONFIG += link_pkgconfig
 PKGCONFIG += libxml++-3.0
-
-# external deps
-unix {
-  # INCLUDEPATH += "/usr/include/glibmm-2.4"
-  #INCLUDEPATH += "/usr/include/libxml2"
-  #INCLUDEPATH += "/usr/include/libxml++-3.0"
-  #LIBS += -L/usr/local/lib -lxml2
-  #LIBS += $(pkg-config --cflags --libs libxml2)
-}
-# TODO: figure out what to do for this on windows??
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
