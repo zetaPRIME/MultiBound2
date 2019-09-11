@@ -7,6 +7,7 @@
 #include <QSet>
 #include <QHash>
 
+#include <QJsonDocument>
 #include <QJsonArray>
 
 #include <QNetworkAccessManager>
@@ -49,6 +50,7 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst) {
     };
 
     bool needsInfo = !info["lockInfo"].toBool();
+    bool needsExtCfg = true;
 
     wsQueue.push_back(wsId); // it starts with one
     while (!wsQueue.empty()) {
@@ -85,6 +87,17 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst) {
         for (auto cn : collNodes) {
             auto id = workshopIdFromLink(str(cn->find(".//a/attribute::href")[0]));
             if (!id.isEmpty()) wsQueue.push_back(id);
+        }
+
+        if (needsExtCfg) { // find extcfg block
+            needsExtCfg = false;
+
+            auto ele = root->find("//div[@class=\"workshopItemDescriptionForCollection\"]//div[@class=\"bb_code\"][last()]/text()");
+            if (!ele.empty()) {
+                QString xcs; // demangle the text from workshop's hackiness
+                for (auto e : ele) xcs.append(str(e)).append("\n");
+                json["extCfg"] = parseJson(xcs.toUtf8()).object();
+            }
         }
 
         xmlFreeDoc(doc);

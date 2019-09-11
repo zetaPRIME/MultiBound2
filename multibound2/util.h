@@ -15,6 +15,7 @@ namespace MultiBound {
         inline QString splicePath(const QDir& d, const QString& p) { return splicePath(d.absolutePath(), p); }
 
         QJsonDocument loadJson(const QString& path);
+        QJsonDocument parseJson(const QByteArray data);
 
         inline QString workshopLinkFromId(const QString& id) { return qs("https://steamcommunity.com/sharedfiles/filedetails/?id=%1").arg(id); }
         inline QString workshopIdFromLink(const QString& link) {

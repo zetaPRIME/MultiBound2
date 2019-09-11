@@ -11,20 +11,24 @@
 QJsonDocument MultiBound::Util::loadJson(const QString& path) {
     QFile f(path);
     f.open(QFile::ReadOnly);
-    auto fc = f.readAll();
+    return parseJson(f.readAll());
+}
+
+QJsonDocument MultiBound::Util::parseJson(const QByteArray data) {
     QJsonParseError err;
-    QJsonDocument json = QJsonDocument::fromJson(fc, &err);
+    QJsonDocument json = QJsonDocument::fromJson(data, &err);
 
     // if it fails, try stripping comments via javascript
-    if (err.error == QJsonParseError::IllegalNumber || err.error == QJsonParseError::IllegalValue) {
+    if (err.error != QJsonParseError::NoError) {
         QJSEngine js;
-        auto v = js.evaluate(qs("js=%1;").arg(QString(fc)));
+        auto v = js.evaluate(qs("js=%1;").arg(QString(data)));
         auto func = js.evaluate(qs("JSON.stringify"));
         QJSValueList args;
         args.append(v);
         auto v2 = func.call(args);
-        if (v2.isString()) json = QJsonDocument::fromJson(v2.toString().toUtf8());
+        if (v2.isString()) json = QJsonDocument::fromJson(v2.toString().toUtf8(), &err);
     }
 
+    if (err.error != QJsonParseError::NoError) qDebug() << err.errorString();
     return json;
 }

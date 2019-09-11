@@ -64,6 +64,8 @@ bool Instance::launch() {
         // construct sbinit
         QJsonObject sbinit;
 
+        auto extCfg = json["extCfg"].toObject(); // extra config from steam workshop collections
+
         // assemble default configuration
         QJsonObject defaultCfg;
         defaultCfg["gameServerBind"] = "*";
@@ -71,6 +73,15 @@ bool Instance::launch() {
         defaultCfg["rconServerBind"] = "*";
         defaultCfg["allowAssetsMismatch"] = true;
         defaultCfg["maxTeamSize"] = 64; // more than you'll ever need, because why is there even a limit!?
+
+        if (auto server = extCfg["defaultServer"].toString(); !server.isEmpty()) {
+            QJsonObject ts;
+            constexpr auto f = QString::SectionSkipEmpty;
+            ts["multiPlayerAddress"] = server.section(':', 0, 0, f);
+            ts["multiPlayerPort"] = server.section(':', 1, 1, f);
+            defaultCfg["title"] = ts;
+        }
+
         sbinit["defaultConfiguration"] = defaultCfg;
 
         // storage directory
