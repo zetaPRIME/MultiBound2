@@ -26,7 +26,7 @@ namespace { // utilities
     }
 }
 
-void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst) {
+void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save) {
     auto wsId = inst->workshopId();
     if (wsId.isEmpty()) return; // no workshop id attached
 
@@ -70,6 +70,10 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst) {
             needsInfo = false;
 
             auto ele = root->find("//div[@class=\"collectionHeaderContent\"]//div[@class=\"workshopItemTitle\"]/text()");
+            if (ele.empty()) { // not a collection, abort
+                xmlFreeDoc(doc);
+                return;
+            }
             auto name = str(ele[0]);
             info["name"] = name;
             info["windowTitle"] = qs("Starbound - %1").arg(name);
@@ -124,5 +128,5 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst) {
     json["assetSources"] = src;
 
     // commit
-    inst->save();
+    if (save) inst->save();
 }

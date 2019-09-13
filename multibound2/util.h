@@ -22,6 +22,6 @@ namespace MultiBound {
             constexpr auto f = QString::SectionSkipEmpty;
             return link.section("id=", 1, 1, f).section('&', 0, 0, f); // extract only id parameter
         }
-        void updateFromWorkshop(Instance*);
+        void updateFromWorkshop(Instance*, bool save = true);
     }
 }

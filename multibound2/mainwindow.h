@@ -19,11 +19,17 @@ namespace MultiBound {
     public:
         std::vector<std::shared_ptr<Instance>> instances;
 
-        explicit MainWindow(QWidget *parent = nullptr);
+        explicit MainWindow(QWidget* parent = nullptr);
         ~MainWindow();
 
-        void refresh();
-        void launch();
+        void refresh(const QString& focusPath = QStringLiteral());
+        void launch(Instance* inst = nullptr);
+
+        void updateFromWorkshop(Instance* inst = nullptr);
+        void newFromWorkshop(const QString& = QStringLiteral());
+
+        Instance* selectedInstance();
+        Instance* findWorkshopId(const QString&);
 
     private:
         Ui::MainWindow *ui;
