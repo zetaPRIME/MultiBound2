@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     MultiBound::Config::load();
+    MultiBound::Config::save();
 
     MultiBound::MainWindow w;
     w.show();

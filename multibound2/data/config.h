@@ -14,6 +14,7 @@ namespace MultiBound {
 
         //
         void load();
+        void save();
 
     }
 }
