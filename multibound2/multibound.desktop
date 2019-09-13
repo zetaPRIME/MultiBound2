@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+
+Name=MultiBound 2
+Comment=Starbound profile launcher
+Categories=Game;Starbound;Qt;
+Icon=xybrid
+
+Path=/usr/bin
+Exec=/usr/bin/multibound
+Terminal=false
