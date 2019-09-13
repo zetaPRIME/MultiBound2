@@ -12,6 +12,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 
 #include <QMenu>
@@ -19,6 +20,7 @@
 #include <QClipboard>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QFileDialog>
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -74,6 +76,24 @@ MainWindow::MainWindow(QWidget *parent) :
         if (id.isEmpty()) return;
         newFromWorkshop(id);
     });
+
+    if (auto fi = QFileInfo(Config::starboundPath); !fi.isFile() || !fi.isExecutable()) {
+        // prompt for working file path if executable missing
+        auto d = fi.dir();
+        if (!d.exists()) { // walk up until dir exists
+            auto cd = qs("..");
+            while (!d.cd(cd)) cd.append(qs("/.."));
+        }
+
+        auto fn = QFileDialog::getOpenFileName(this, qs("Locate Starbound executable..."), d.absolutePath());
+        if (fn.isEmpty()) {
+            QMetaObject::invokeMethod(this, [this] { close(); QApplication::quit(); }, Qt::ConnectionType::QueuedConnection);
+        } else { // set new path and refresh
+            Config::starboundPath = fn;
+            Config::save();
+            Config::load();
+        }
+    }
 
     refresh();
 }

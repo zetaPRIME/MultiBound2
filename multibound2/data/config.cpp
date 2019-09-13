@@ -43,10 +43,10 @@ void MultiBound::Config::load() {
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
 
     QDir r(starboundPath);
-    while (r.dirName().toLower() != "starbound") { r.cdUp(); if (r.isRoot()) break; }
+    while (r.dirName().toLower() != "starbound") { auto old = r; r.cdUp(); if (r == old) break; }
     starboundRoot = QDir::cleanPath(r.absolutePath());
 
-    while (r.dirName().toLower() != "steamapps") { r.cdUp(); if (r.isRoot()) break; }
+    while (r.dirName().toLower() != "steamapps") { auto old = r; r.cdUp(); if (r == old) break; }
     workshopRoot = Util::splicePath(r.absolutePath(), "/workshop/content/211820/");
 
 }
