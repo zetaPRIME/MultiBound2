@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
                     QDesktopServices::openUrl(QUrl(Util::workshopLinkFromId(id)));
                 });
             }
-            m->addAction(qs("Open instance folder"), [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
+            m->addAction(qs("Open instance directory"), [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
             m->addSeparator();
         }
 
