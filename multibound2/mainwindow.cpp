@@ -49,13 +49,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if (auto i = ui->instanceList->itemAt(pt); i) {
             auto inst = instanceFromItem(i);
-            m->addAction(qs("Launch Instance"), this, [this, inst] { launch(inst); });
+            m->addAction(qs("Launch instance"), this, [this, inst] { launch(inst); });
             if (auto id = inst->workshopId(); !id.isEmpty()) {
                 m->addAction(qs("Update from Workshop collection"), [this, inst] { updateFromWorkshop(inst); });
                 m->addAction(qs("Open Workshop link..."), [id] {
                     QDesktopServices::openUrl(QUrl(Util::workshopLinkFromId(id)));
                 });
             }
+            m->addAction(qs("Open instance folder"), [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
             m->addSeparator();
         }
 
