@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->launchButton, &QPushButton::pressed, this, [this] { launch(); });
     connect(ui->instanceList, &QListWidget::doubleClicked, this, [this](const QModelIndex& ind) { if (ind.isValid()) launch(); });
+    connect(new QShortcut(QKeySequence("Return"), ui->instanceList), &QShortcut::activated, this, [this] { launch(); });
 
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
         auto m = new QMenu(this);
