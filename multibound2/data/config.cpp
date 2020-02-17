@@ -48,7 +48,7 @@ void MultiBound::Config::load() {
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
 
     QDir r(starboundPath);
-    while (r.dirName().toLower() != "starbound") { auto old = r; r.cdUp(); if (r == old) break; }
+    while (r.dirName().toLower() != "starbound" || !r.exists()) { auto old = r; r.cdUp(); if (r == old) break; }
     starboundRoot = QDir::cleanPath(r.absolutePath());
 
     while (r.dirName().toLower() != "steamapps") { auto old = r; r.cdUp(); if (r == old) break; }
