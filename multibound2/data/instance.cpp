@@ -50,6 +50,7 @@ bool Instance::load() {
 }
 
 bool Instance::save() {
+    QDir(path).mkpath(".");
     QFile f(QDir(path).absoluteFilePath("instance.json"));
     f.open(QFile::WriteOnly);
     f.write(QJsonDocument(json).toJson());
