@@ -14,16 +14,23 @@
 #include <QNetworkReply>
 #include <QEventLoop>
 
+/*
 #include <libxml/tree.h>
 #include <libxml/HTMLparser.h>
 #include <libxml++/libxml++.h>
+*/
+
+#include <QWebEnginePage>
+#include <QWebEngineSettings>
 
 namespace { // utilities
-    inline QString str(xmlpp::Node* n) {
+    /*inline QString str(xmlpp::Node* n) {
         if (auto nn = dynamic_cast<xmlpp::ContentNode*>(n); nn) return QString::fromUtf8(nn->get_content().data());
         if (auto nn = dynamic_cast<xmlpp::AttributeNode*>(n); nn) return QString::fromUtf8(nn->get_value().data());
         return qs();
-    }
+    }*/
+
+    QString jQuery;
 }
 
 void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save) {
@@ -49,6 +56,23 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         return reply;
     };
 
+    auto page = new QWebEnginePage();
+    page->settings()->setAttribute(QWebEngineSettings::AutoLoadImages, false);
+    QObject::connect(page, &QWebEnginePage::loadFinished, &ev, &QEventLoop::quit);
+
+    if (jQuery.isEmpty())
+        jQuery = get(qs("https://code.jquery.com/jquery-3.4.1.min.js"))->readAll();
+
+    auto queryPage = [&](const QString& q) {
+        QVariant res;
+        page->runJavaScript(q, [&](const QVariant& r) {
+            res = r;
+            ev.quit();
+        });
+        ev.exec();
+        return res;
+    };
+
     bool needsInfo = !info["lockInfo"].toBool();
     bool needsExtCfg = true;
 
@@ -60,51 +84,86 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         wsVisited.insert(cId);
 
         // request synchronously and feed into parser
-        auto reply = get(workshopLinkFromId(cId));
+        /*auto reply = get(workshopLinkFromId(cId));
         if (reply->error() != QNetworkReply::NoError) continue; // failed
         auto replyContents = reply->readAll();
         auto doc = htmlReadDoc(reinterpret_cast<xmlChar*>(replyContents.data()), nullptr, nullptr, HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
-        auto root = std::make_shared<xmlpp::Element>(xmlDocGetRootElement(doc));
+        auto root = std::make_shared<xmlpp::Element>(xmlDocGetRootElement(doc));*/
+
+        // request synchronously
+        page->load(workshopLinkFromId(cId));
+        ev.exec();
+        queryPage(jQuery);
 
         if (needsInfo) { // update display name and title from html
             needsInfo = false;
 
-            auto ele = root->find("//div[@class=\"collectionHeaderContent\"]//div[@class=\"workshopItemTitle\"]/text()");
+            /*auto ele = root->find("//div[@class=\"collectionHeaderContent\"]//div[@class=\"workshopItemTitle\"]/text()");
             if (ele.empty()) { // not a collection, abort
                 xmlFreeDoc(doc);
                 return;
-            }
-            auto name = str(ele[0]);
+            }*/
+            auto name = //str(ele[0]);
+                queryPage("$('div.collectionHeaderContent div.workshopItemTitle').first().text()").toString();
             info["name"] = name;
             info["windowTitle"] = qs("Starbound - %1").arg(name);
         }
 
         // handle mod entries
-        auto modNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"collectionItemDetails\"]");
+        {
+            QString q = " \
+                (function(){ var res = [ ]; \
+                $('div.collectionChildren div.collectionItemDetails').each(function(){ \
+                res.push({ link : $(this).find('a').first().attr('href'), title : $(this).find('div.workshopItemTitle').first().text() }); \
+                }); \
+                return res; })();";
+            auto mods = queryPage(q).toJsonArray();
+            for (auto mn : mods) {
+                auto id = workshopIdFromLink(mn.toObject()["link"].toString());
+                if (!wsMods.contains(id)) wsMods[id] = mn.toObject()["title"].toString();
+            }
+        }
+        /*auto modNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"collectionItemDetails\"]");
         for (auto mn : modNodes) {
             auto id = workshopIdFromLink(str(mn->find(".//a/attribute::href")[0]));
             if (!wsMods.contains(id)) wsMods[id] = str(mn->find(".//div[@class=\"workshopItemTitle\"]/text()")[0]);
-        }
+        }*/
 
         // and queue up subcollections
-        auto collNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"workshopBrowseRow\"]/div[starts-with(@class, 'workshopItem')]");
+        {
+            QString q = " \
+                (function(){ var res = [ ]; \
+                $('div.collectionChildren div.workshopBrowseRow > div[class^=\\'workshopItem\\'').each(function(){ \
+                res.push( $(this).find('a').attr('href') ); \
+                }); \
+                return res; })();";
+            auto colls = queryPage(q).toJsonArray();
+            for (auto cn : colls) {
+                auto id = workshopIdFromLink(cn.toString());
+                if (!id.isEmpty()) wsQueue.push_back(id);
+            }
+        }
+        /*auto collNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"workshopBrowseRow\"]/div[starts-with(@class, 'workshopItem')]");
         for (auto cn : collNodes) {
             auto id = workshopIdFromLink(str(cn->find(".//a/attribute::href")[0]));
             if (!id.isEmpty()) wsQueue.push_back(id);
-        }
+        }*/
 
         if (needsExtCfg) { // find extcfg block
             needsExtCfg = false;
 
-            auto ele = root->find("//div[@class=\"workshopItemDescriptionForCollection\"]//div[@class=\"bb_code\"][last()]/text()");
+            json["extCfg"] = queryPage("eval('json_out = ' + $('div.workshopItemDescriptionForCollection div.bb_code').last().html().replace(/<br>/gi,'\\n') + '; json_out')").toJsonObject();
+
+            /*auto ele = root->find("//div[@class=\"workshopItemDescriptionForCollection\"]//div[@class=\"bb_code\"][last()]/text()");
             if (!ele.empty()) {
                 QString xcs; // demangle the text from workshop's hackiness
                 for (auto e : ele) xcs.append(str(e)).append("\n");
                 json["extCfg"] = parseJson(xcs.toUtf8()).object();
-            }
+            }*/
         }
 
-        xmlFreeDoc(doc);
+        //xmlFreeDoc(doc);
+        page->deleteLater();
     }
 
     json["info"] = info; // update info in json body

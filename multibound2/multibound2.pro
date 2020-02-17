@@ -9,6 +9,7 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 QT += qml # required for QJSEngine
+QT += webenginewidgets
 
 TARGET = multibound
 TEMPLATE = app
@@ -30,6 +31,8 @@ CONFIG += c++17
 
 # use all optimizations that won't generally interfere with debugging
 QMAKE_CXXFLAGS_DEBUG += -Og
+
+DEFINES += USE_PAGE_SCRAPING
 
 # automatically build file lists
 SOURCES += $$files(*.cpp, true)
