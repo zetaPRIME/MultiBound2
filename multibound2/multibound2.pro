@@ -40,11 +40,6 @@ HEADERS += $$files(*.h, true) \
            $$files(*.hpp, true)
 FORMS += $$files(*.ui, true)
 
-# external deps
-# TODO (maybe): figure out what to do for this on windows??
-CONFIG += link_pkgconfig
-PKGCONFIG += libxml++-3.0
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /usr/bin

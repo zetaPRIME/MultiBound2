@@ -12,6 +12,5 @@ MultiBound enables you to quickly and easily set up and use multiple separate in
 ## How to compile
 Make sure you have:
 - Up to date QtCreator
-- libxml++ and dependencies
 
 Open up the project and build like you would any other Qt application.

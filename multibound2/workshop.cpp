@@ -14,22 +14,10 @@
 #include <QNetworkReply>
 #include <QEventLoop>
 
-/*
-#include <libxml/tree.h>
-#include <libxml/HTMLparser.h>
-#include <libxml++/libxml++.h>
-*/
-
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
 
 namespace { // utilities
-    /*inline QString str(xmlpp::Node* n) {
-        if (auto nn = dynamic_cast<xmlpp::ContentNode*>(n); nn) return QString::fromUtf8(nn->get_content().data());
-        if (auto nn = dynamic_cast<xmlpp::AttributeNode*>(n); nn) return QString::fromUtf8(nn->get_value().data());
-        return qs();
-    }*/
-
     QString jQuery;
 }
 
@@ -61,7 +49,7 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
     QObject::connect(page, &QWebEnginePage::loadFinished, &ev, &QEventLoop::quit);
 
     if (jQuery.isEmpty())
-        jQuery = get(qs("https://code.jquery.com/jquery-3.4.1.min.js"))->readAll();
+        jQuery = get(qs("https://code.jquery.com/jquery-3.4.1.slim.min.js"))->readAll();
 
     auto queryPage = [&](const QString& q) {
         QVariant res;
@@ -83,28 +71,16 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         if (cId.isEmpty() || wsVisited.contains(cId)) continue;
         wsVisited.insert(cId);
 
-        // request synchronously and feed into parser
-        /*auto reply = get(workshopLinkFromId(cId));
-        if (reply->error() != QNetworkReply::NoError) continue; // failed
-        auto replyContents = reply->readAll();
-        auto doc = htmlReadDoc(reinterpret_cast<xmlChar*>(replyContents.data()), nullptr, nullptr, HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
-        auto root = std::make_shared<xmlpp::Element>(xmlDocGetRootElement(doc));*/
-
         // request synchronously
         page->load(workshopLinkFromId(cId));
         ev.exec();
-        queryPage(jQuery);
+        // inject jQuery; we don't need to do this synchronously, it'll just batch with the first request
+        page->runJavaScript(jQuery);
 
         if (needsInfo) { // update display name and title from html
             needsInfo = false;
 
-            /*auto ele = root->find("//div[@class=\"collectionHeaderContent\"]//div[@class=\"workshopItemTitle\"]/text()");
-            if (ele.empty()) { // not a collection, abort
-                xmlFreeDoc(doc);
-                return;
-            }*/
-            auto name = //str(ele[0]);
-                queryPage("$('div.collectionHeaderContent div.workshopItemTitle').first().text()").toString();
+            auto name = queryPage("$('div.collectionHeaderContent div.workshopItemTitle').first().text()").toString();
             info["name"] = name;
             info["windowTitle"] = qs("Starbound - %1").arg(name);
         }
@@ -123,11 +99,6 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
                 if (!wsMods.contains(id)) wsMods[id] = mn.toObject()["title"].toString();
             }
         }
-        /*auto modNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"collectionItemDetails\"]");
-        for (auto mn : modNodes) {
-            auto id = workshopIdFromLink(str(mn->find(".//a/attribute::href")[0]));
-            if (!wsMods.contains(id)) wsMods[id] = str(mn->find(".//div[@class=\"workshopItemTitle\"]/text()")[0]);
-        }*/
 
         // and queue up subcollections
         {
@@ -143,26 +114,13 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
                 if (!id.isEmpty()) wsQueue.push_back(id);
             }
         }
-        /*auto collNodes = root->find("//div[@class=\"collectionChildren\"]//div[@class=\"workshopBrowseRow\"]/div[starts-with(@class, 'workshopItem')]");
-        for (auto cn : collNodes) {
-            auto id = workshopIdFromLink(str(cn->find(".//a/attribute::href")[0]));
-            if (!id.isEmpty()) wsQueue.push_back(id);
-        }*/
 
         if (needsExtCfg) { // find extcfg block
             needsExtCfg = false;
 
             json["extCfg"] = queryPage("eval('json_out = ' + $('div.workshopItemDescriptionForCollection div.bb_code').last().html().replace(/<br>/gi,'\\n') + '; json_out')").toJsonObject();
-
-            /*auto ele = root->find("//div[@class=\"workshopItemDescriptionForCollection\"]//div[@class=\"bb_code\"][last()]/text()");
-            if (!ele.empty()) {
-                QString xcs; // demangle the text from workshop's hackiness
-                for (auto e : ele) xcs.append(str(e)).append("\n");
-                json["extCfg"] = parseJson(xcs.toUtf8()).object();
-            }*/
         }
 
-        //xmlFreeDoc(doc);
         page->deleteLater();
     }
 
