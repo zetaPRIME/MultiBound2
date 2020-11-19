@@ -14,8 +14,12 @@
 QString MultiBound::Config::configPath;
 QString MultiBound::Config::instanceRoot;
 QString MultiBound::Config::workshopRoot;
+QString MultiBound::Config::steamcmdDLRoot;
+QString MultiBound::Config::steamcmdWorkshopRoot;
 QString MultiBound::Config::starboundPath;
 QString MultiBound::Config::starboundRoot;
+
+bool MultiBound::Config::steamcmdEnabled = true;
 
 void MultiBound::Config::load() {
     // defaults
@@ -36,6 +40,8 @@ void MultiBound::Config::load() {
     if (auto d = QDir(configPath); !d.exists()) d.mkpath(".");
     instanceRoot = Util::splicePath(configPath, "/instances/");
 
+    steamcmdDLRoot = configPath;
+
     QJsonObject cfg;
     if (QFile f(Util::splicePath(configPath, "/config.json")); f.exists()) {
         f.open(QFile::ReadOnly);
@@ -43,6 +49,7 @@ void MultiBound::Config::load() {
 
         starboundPath = cfg["starboundPath"].toString(starboundPath);
         instanceRoot = cfg["instanceRoot"].toString(instanceRoot);
+        steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
     }
 
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
@@ -54,12 +61,15 @@ void MultiBound::Config::load() {
     while (r.dirName().toLower() != "steamapps") { auto old = r; r.cdUp(); if (r == old) break; }
     workshopRoot = Util::splicePath(r.absolutePath(), "/workshop/content/211820/");
 
+    steamcmdWorkshopRoot = Util::splicePath(QDir(steamcmdDLRoot).absolutePath(), "/steamapps/workshop/content/211820/");
+
 }
 
 void MultiBound::Config::save() {
     QJsonObject cfg;
     cfg["starboundPath"] = starboundPath;
     cfg["instanceRoot"] = instanceRoot;
+    cfg["steamcmdRoot"] = steamcmdDLRoot;
 
     QFile f(Util::splicePath(configPath, "/config.json"));
     f.open(QFile::WriteOnly);

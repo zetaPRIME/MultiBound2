@@ -34,8 +34,10 @@ QString Instance::evaluatePath(const QString& p) {
     auto body = p.section(':', 1, -1, f);
 
     if (pfx == "sb") return Util::splicePath(Config::starboundRoot, body);
-    else if (pfx == "ws" || pfx == "workshop") return Util::splicePath(Config::workshopRoot, body);
-    else if (pfx == "inst") return Util::splicePath(path, body);
+    else if (pfx == "ws" || pfx == "workshop") {
+        if (auto s = Util::splicePath(Config::workshopRoot, body); QDir(s).exists()) return s;
+        return Util::splicePath(Config::steamcmdWorkshopRoot, body);
+    } else if (pfx == "inst") return Util::splicePath(path, body);
 
     return QDir::cleanPath(p);
 }

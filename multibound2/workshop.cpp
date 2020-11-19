@@ -1,5 +1,6 @@
 #include "util.h" // part of utility header
 
+#include "data/config.h"
 #include "data/instance.h"
 
 #include <deque>
@@ -146,4 +147,6 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
 
     // commit
     if (save) inst->save();
+
+    if (Config::steamcmdEnabled) Util::updateMods(inst);
 }

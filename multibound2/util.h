@@ -23,5 +23,7 @@ namespace MultiBound {
             return link.section("id=", 1, 1, f).section('&', 0, 0, f); // extract only id parameter
         }
         void updateFromWorkshop(Instance*, bool save = true);
+
+        void updateMods(Instance*);
     }
 }

@@ -11,6 +11,10 @@ namespace MultiBound {
         extern QString starboundPath;
         extern QString starboundRoot;
         extern QString workshopRoot;
+        extern QString steamcmdDLRoot;
+        extern QString steamcmdWorkshopRoot;
+
+        extern bool steamcmdEnabled;
 
         //
         void load();
