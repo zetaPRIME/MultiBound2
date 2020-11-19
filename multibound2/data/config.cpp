@@ -23,17 +23,15 @@ bool MultiBound::Config::steamcmdEnabled = true;
 
 void MultiBound::Config::load() {
     // defaults
+    configPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation); // already has "multibound" attached
 #if defined(Q_OS_WIN)
-    configPath = QCoreApplication::applicationDirPath(); // same place as the exe on windows, like mb1
+    //configPath = QCoreApplication::applicationDirPath(); // same place as the exe on windows, like mb1
     starboundPath = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/SteamApps/common/Starbound/win64/starbound.exe"));
 #elif defined(Q_OS_MACOS)
-    configPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation); // already has "multibound" attached
-
+    steamcmdEnabled = false; // mac steamcmd support not yet implemented
     QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
     starboundPath = Util::splicePath(home, "/Library/Application Support/Steam/steamapps/common/Starbound/osx/Starbound.app/Contents/MacOS/starbound");
 #else
-    configPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation); // already has "multibound" attached
-
     QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
     starboundPath = Util::splicePath(home, "/.steam/steam/steamapps/common/Starbound/linux/run-client.sh");
 #endif

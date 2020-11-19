@@ -98,8 +98,11 @@ MainWindow::MainWindow(QWidget *parent) :
     refresh();
 
     Util::updateStatus = [this] (QString msg) {
+        ui->statusBar->setVisible(!msg.isEmpty()); // only show status bar when a message is shown
         ui->statusBar->showMessage(msg);
     };
+
+    Util::updateStatus("");
 }
 
 MainWindow::~MainWindow() { delete ui; }
