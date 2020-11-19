@@ -10,6 +10,10 @@
 #include <QFile>
 #include <QEventLoop>
 
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QDataStream>
+
 #include <QSet>
 
 namespace {
@@ -17,10 +21,47 @@ namespace {
 }
 
 void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
-    updateStatus(updMsg);
-
     auto scp = new QProcess();
+#if defined(Q_OS_WIN)
+    QDir scd(Config::configPath);
+    scd.cd("steamcmd");
+    if (!scd.exists("steamcmd.exe")) { // download and install if not present
+        updateStatus(qs("Installing steamcmd..."));
+
+        QNetworkAccessManager net;
+        QEventLoop ev;
+        auto get = [&](QUrl url) {
+            auto reply = net.get(QNetworkRequest(url));
+            QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
+            ev.exec(); // wait for things
+            reply->deleteLater(); // queue deletion on event loop, *after we're done*
+            return reply;
+        };
+
+        auto scz = scd.absoluteFilePath("steamcmd.zip");
+        QFile sczf(scz);
+        sczf.open(QIODevice::ReadWrite | QIODevice::Truncate);
+        sczf.write(get(qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"))->readAll());
+
+        scp->start("powershell", QStringList() << "Expand-Archive" << scz << scd.absolutePath());
+        if (!scp->waitForFinished()) return; // extraction failed for some reason or another, abort
+    }
+    scp->setProgram(scd.absoluteFilePath("steamcmd.exe"));
+    scp->setWorkingDirectory(scd.absolutePath());
+#elif defined(Q_OS_MACOS)
+    if (QDir scd("~/Steam/steamcmd.sh"); scd.exists()) { // assume suggested install location
+        scp->setProgram(scd.absolutePath());
+    } else return;
+#else
+    // test with standard "which" command on linux
+    scp->start("which", QStringList() << "steamcmd");
+    if (!scp->waitForFinished()) return;
+    scp->readAll(); // clear buffer
+
     scp->setProgram("steamcmd");
+#endif
+
+    updateStatus(updMsg);
 
     auto& json = inst->json;
 
@@ -44,14 +85,20 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
 
     int wsc = 0;
 
+    bool ws = !Config::workshopRoot.isEmpty(); // workshop active; valid workshop root?
+    bool wsUpd = true; // should update workshop-subscribed mods?
+
     QString wsScript, dlScript;
     QTextStream wss(&wsScript), dls(&dlScript);
 
     wss << qs("login anonymous\n");
+    if (ws) { // if valid workshop, force proper root in case steamcmd defaults are incorrect
+        QDir wsr(Config::workshopRoot);
+        for (int i = 0; i < 4; i++) wsr.cdUp();
+        wss << qs("force_install_dir ") << wsr.absolutePath() << qs("\n");
+    }
     dls << qs("force_install_dir ") << Config::steamcmdDLRoot << qs("\n");
 
-    bool ws = !Config::workshopRoot.isEmpty(); // workshop active; valid workshop root?
-    bool wsUpd = true; // should update workshop-subscribed mods?
     auto eh = qs("workshop_download_item 211820 ");
     for (auto id : workshop) {
         if (!workshopExclude.contains(id)) {
