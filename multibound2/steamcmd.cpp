@@ -33,6 +33,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         updateStatus(qs("Downloading steamcmd..."));
         scp->start("powershell", QStringList() << "curl -o"<< scd.absoluteFilePath("steamcmd.zip") << "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip");
         auto scz = scd.absoluteFilePath("steamcmd.zip");
+
         ev.exec();
         scp->start("powershell", QStringList() << "Expand-Archive"<< "-DestinationPath" << scd.absolutePath() << "-LiteralPath" << scz);
         ev.exec();
