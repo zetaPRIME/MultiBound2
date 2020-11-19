@@ -31,22 +31,10 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
 
     if (!scd.exists("steamcmd.exe")) { // download and install if not present
         updateStatus(qs("Downloading steamcmd..."));
-
-        QNetworkAccessManager net;
-        auto get = [&](QUrl url) {
-            auto reply = net.get(QNetworkRequest(url));
-            QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
-            ev.exec(); // wait for things
-            reply->deleteLater(); // queue deletion on event loop, *after we're done*
-            return reply;
-        };
-
+        scp->start("powershell", QStringList() << "curl -o"<< scd.absoluteFilePath("steamcmd.zip") << "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip");
         auto scz = scd.absoluteFilePath("steamcmd.zip");
-        QFile sczf(scz);
-        sczf.open(QIODevice::ReadWrite | QIODevice::Truncate);
-        sczf.write(get(qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"))->readAll());
-
-        scp->start("powershell", QStringList() << "Expand-Archive" << scz << scd.absolutePath());
+        ev.exec();
+        scp->start("powershell", QStringList() << "Expand-Archive"<< "-DestinationPath" << scd.absolutePath() << "-LiteralPath" << scz);
         ev.exec();
         if (scp->exitCode() != 0) return; // extraction failed for some reason or another, abort
 
