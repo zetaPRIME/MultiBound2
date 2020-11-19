@@ -45,6 +45,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         QFile sczf(scz);
         sczf.open(QIODevice::ReadWrite | QIODevice::Truncate);
         sczf.write(get(qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"))->readAll());
+        sczf.close();
 
         scp->start("powershell", QStringList() << "Expand-Archive" << scz << scd.absolutePath());
         ev.exec();
