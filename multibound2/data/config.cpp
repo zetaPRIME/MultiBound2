@@ -28,7 +28,6 @@ void MultiBound::Config::load() {
     //configPath = QCoreApplication::applicationDirPath(); // same place as the exe on windows, like mb1
     starboundPath = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/SteamApps/common/Starbound/win64/starbound.exe"));
 #elif defined(Q_OS_MACOS)
-    steamcmdEnabled = false; // mac steamcmd support not yet implemented
     QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
     starboundPath = Util::splicePath(home, "/Library/Application Support/Steam/steamapps/common/Starbound/osx/Starbound.app/Contents/MacOS/starbound");
 #else

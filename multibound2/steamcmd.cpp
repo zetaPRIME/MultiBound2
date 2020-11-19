@@ -22,14 +22,17 @@ namespace {
 
 void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     auto scp = new QProcess();
+    QEventLoop ev;
+    QObject::connect(scp, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &ev, &QEventLoop::quit);
 #if defined(Q_OS_WIN)
     QDir scd(Config::configPath);
+    scd.mkpath("steamcmd"); // make sure it exists
     scd.cd("steamcmd");
+
     if (!scd.exists("steamcmd.exe")) { // download and install if not present
-        updateStatus(qs("Installing steamcmd..."));
+        updateStatus(qs("Downloading steamcmd..."));
 
         QNetworkAccessManager net;
-        QEventLoop ev;
         auto get = [&](QUrl url) {
             auto reply = net.get(QNetworkRequest(url));
             QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
@@ -44,21 +47,54 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         sczf.write(get(qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"))->readAll());
 
         scp->start("powershell", QStringList() << "Expand-Archive" << scz << scd.absolutePath());
-        if (!scp->waitForFinished()) return; // extraction failed for some reason or another, abort
+        ev.exec();
+        if (scp->exitCode() != 0) return; // extraction failed for some reason or another, abort
+
+        // finish installing
+        updateStatus(qs("Installing steamcmd..."));
+        scp->setWorkingDirectory(scd.absolutePath());
+        scp->start(scd.absoluteFilePath("steamcmd.exe"), QStringList() << "+exit");
+        ev.exec();
+
+        scp->readAll(); // and clean up buffer
     }
     scp->setProgram(scd.absoluteFilePath("steamcmd.exe"));
     scp->setWorkingDirectory(scd.absolutePath());
-#elif defined(Q_OS_MACOS)
-    if (QDir scd("~/Steam/steamcmd.sh"); scd.exists()) { // assume suggested install location
-        scp->setProgram(scd.absolutePath());
-    } else return;
 #else
-    // test with standard "which" command on linux
-    scp->start("which", QStringList() << "steamcmd");
-    if (!scp->waitForFinished()) return;
-    scp->readAll(); // clear buffer
+    // test with standard "which" command on linux and mac
+    if (scp->execute("which", QStringList() << "steamcmd") == 0) { // use system steamcmd if present
+        scp->readAll(); // clear buffer
+        scp->setProgram("steamcmd");
+    } else { // use our own copy, and install automatically if necessary
+        scp->readAll(); // clear buffer
 
-    scp->setProgram("steamcmd");
+        QDir scd(Config::configPath);
+        scd.mkpath("steamcmd"); // make sure it exists
+        scd.cd("steamcmd");
+
+        if (!scd.exists("steamcmd.sh")) { // install local copy
+            updateStatus(qs("Downloading steamcmd..."));
+#if defined(Q_OS_MACOS)
+            auto scUrl = qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz");
+#else
+            auto scUrl = qs("https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz");
+#endif
+            scp->setWorkingDirectory(scd.absolutePath());
+            scp->start("bash", QStringList() << "-c" << qs("curl -sqL \"%1\" | tar -xzvf -").arg(scUrl));
+            ev.exec();
+            if (scp->exitCode() != 0) return; // something went wrong, abort
+
+            // finish installing
+            updateStatus(qs("Installing steamcmd..."));
+            scp->setWorkingDirectory(scd.absolutePath());
+            scp->start(scd.absoluteFilePath("steamcmd.sh"), QStringList() << "+exit");
+            ev.exec();
+
+            scp->readAll(); // and clean up buffer
+        }
+        scp->setProgram(scd.absoluteFilePath("steamcmd.sh"));
+        scp->setWorkingDirectory(scd.absolutePath());
+    }
 #endif
 
     updateStatus(updMsg);
@@ -121,9 +157,6 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QStringList args;
     args << "+runscript" << scriptPath << "+quit";
     scp->setArguments(args);
-
-    QEventLoop ev;
-    QObject::connect(scp, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &ev, &QEventLoop::quit);
 
     int wsp = 0;
     updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
