@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <QString>
 #include <QDir>
 
@@ -25,5 +27,7 @@ namespace MultiBound {
         void updateFromWorkshop(Instance*, bool save = true);
 
         void updateMods(Instance*);
+
+        extern std::function<void(QString)> updateStatus;
     }
 }

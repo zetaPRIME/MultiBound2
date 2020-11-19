@@ -23,6 +23,8 @@ namespace { // utilities
 }
 
 void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save) {
+    updateStatus("Fetching collection details...");
+
     auto wsId = inst->workshopId();
     if (wsId.isEmpty()) return; // no workshop id attached
 
@@ -149,4 +151,5 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
     if (save) inst->save();
 
     if (Config::steamcmdEnabled) Util::updateMods(inst);
+    updateStatus("");
 }

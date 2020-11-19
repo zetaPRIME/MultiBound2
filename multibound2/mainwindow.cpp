@@ -37,9 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
-    // hide elements not in use yet
-    ui->statusBar->setVisible(false);
-
     connect(ui->launchButton, &QPushButton::pressed, this, [this] { launch(); });
     connect(ui->instanceList, &QListWidget::doubleClicked, this, [this](const QModelIndex& ind) { if (ind.isValid()) launch(); });
     connect(new QShortcut(QKeySequence("Return"), ui->instanceList), &QShortcut::activated, this, [this] { launch(); });
@@ -99,9 +96,21 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     refresh();
+
+    Util::updateStatus = [this] (QString msg) {
+        ui->statusBar->showMessage(msg);
+    };
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::setInteractive(bool b) {
+    ui->menuBar->setEnabled(b);
+    ui->centralWidget->setEnabled(b);
+
+    if (b) unsetCursor();
+    else setCursor(Qt::WaitCursor);
+}
 
 void MainWindow::refresh(const QString& focusPath) {
     QString selPath;
@@ -142,9 +151,9 @@ void MainWindow::launch(Instance* inst) {
 
 void MainWindow::updateFromWorkshop(Instance* inst) {
     if (!inst) { inst = selectedInstance(); if (!inst) return; }
-    setEnabled(false);
+    setInteractive(false);
     Util::updateFromWorkshop(inst);
-    setEnabled(true);
+    setInteractive(true);
     refresh(inst->path);
 }
 
@@ -157,7 +166,7 @@ void MainWindow::newFromWorkshop(const QString& id_) {
         if (!ok || id.isEmpty()) return;
     }
 
-    setEnabled(false);
+    setInteractive(false);
     auto inst = findWorkshopId(id);
     if (inst) {
         return updateFromWorkshop(inst);
@@ -180,7 +189,7 @@ void MainWindow::newFromWorkshop(const QString& id_) {
             }
         }
     }
-    setEnabled(true);
+    setInteractive(true);
 }
 
 Instance* MainWindow::selectedInstance() {

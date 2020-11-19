@@ -59,7 +59,7 @@ void MultiBound::Config::load() {
     starboundRoot = QDir::cleanPath(r.absolutePath());
 
     while (r.dirName().toLower() != "steamapps") { auto old = r; r.cdUp(); if (r == old) break; }
-    workshopRoot = Util::splicePath(r.absolutePath(), "/workshop/content/211820/");
+    if (auto rr = r.absolutePath(); rr.length() >= 10) workshopRoot = Util::splicePath(rr, "/workshop/content/211820/");
 
     steamcmdWorkshopRoot = Util::splicePath(QDir(steamcmdDLRoot).absolutePath(), "/steamapps/workshop/content/211820/");
 

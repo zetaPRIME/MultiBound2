@@ -22,6 +22,8 @@ namespace MultiBound {
         explicit MainWindow(QWidget* parent = nullptr);
         ~MainWindow();
 
+        void setInteractive(bool);
+
         void refresh(const QString& focusPath = QStringLiteral());
         void launch(Instance* inst = nullptr);
 

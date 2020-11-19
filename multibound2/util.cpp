@@ -8,6 +8,8 @@
 
 #include <QDebug>
 
+std::function<void(QString)> MultiBound::Util::updateStatus;
+
 QJsonDocument MultiBound::Util::loadJson(const QString& path) {
     QFile f(path);
     f.open(QFile::ReadOnly);
