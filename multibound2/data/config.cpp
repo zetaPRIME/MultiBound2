@@ -20,6 +20,7 @@ QString MultiBound::Config::starboundPath;
 QString MultiBound::Config::starboundRoot;
 
 bool MultiBound::Config::steamcmdEnabled = true;
+bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
 void MultiBound::Config::load() {
     // defaults
@@ -27,7 +28,7 @@ void MultiBound::Config::load() {
 #if defined(Q_OS_WIN)
     //; // same place as the exe on windows, like mb1
     if (QDir(QCoreApplication::applicationDirPath()).exists("config.json"))
-            configPath = QCoreApplication::applicationDirPath();
+        configPath = QCoreApplication::applicationDirPath();
     starboundPath = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/SteamApps/common/Starbound/win64/starbound.exe"));
 #elif defined(Q_OS_MACOS)
     QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
@@ -49,6 +50,8 @@ void MultiBound::Config::load() {
         starboundPath = cfg["starboundPath"].toString(starboundPath);
         instanceRoot = cfg["instanceRoot"].toString(instanceRoot);
         steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
+
+        steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
     }
 
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
@@ -69,6 +72,8 @@ void MultiBound::Config::save() {
     cfg["starboundPath"] = starboundPath;
     cfg["instanceRoot"] = instanceRoot;
     cfg["steamcmdRoot"] = steamcmdDLRoot;
+
+    cfg["steamcmdUpdateSteamMods"] = steamcmdUpdateSteamMods;
 
     QFile f(Util::splicePath(configPath, "/config.json"));
     f.open(QFile::WriteOnly);

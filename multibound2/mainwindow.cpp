@@ -40,8 +40,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->launchButton, &QPushButton::pressed, this, [this] { launch(); });
     connect(ui->instanceList, &QListWidget::doubleClicked, this, [this](const QModelIndex& ind) { if (ind.isValid()) launch(); });
     connect(new QShortcut(QKeySequence("Return"), ui->instanceList), &QShortcut::activated, this, [this] { launch(); });
-    connect(new QShortcut(QKeySequence("Ctrl+Q"), this), &QShortcut::activated, this, [this] { this->close(); });
 
+    // hook up menus
+    ui->actionRefresh->shortcuts() << QKeySequence("F5");
+    connect(ui->actionRefresh, &QAction::triggered, this, [this] { refresh(); });
+    connect(ui->actionExit, &QAction::triggered, this, [this] { close(); });
+    connect(ui->actionFromCollection, &QAction::triggered, this, [this] { newFromWorkshop(); });
+
+    // settings
+    ui->actionUpdateSteamMods->setChecked(Config::steamcmdUpdateSteamMods);
+    connect(ui->actionUpdateSteamMods, &QAction::triggered, this, [](bool b) {
+        Config::steamcmdUpdateSteamMods = b;
+        Config::save();
+    });
+
+    // and context menu
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
         auto m = new QMenu(this);
 

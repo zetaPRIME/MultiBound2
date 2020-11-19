@@ -111,7 +111,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     int wsc = 0;
 
     bool ws = !Config::workshopRoot.isEmpty(); // workshop active; valid workshop root?
-    bool wsUpd = true; // should update workshop-subscribed mods?
+    bool wsUpd = Config::steamcmdUpdateSteamMods; // should update workshop-subscribed mods?
 
     QString wsScript, dlScript;
     QTextStream wss(&wsScript), dls(&dlScript);

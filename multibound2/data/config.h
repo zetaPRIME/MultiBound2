@@ -15,6 +15,7 @@ namespace MultiBound {
         extern QString steamcmdWorkshopRoot;
 
         extern bool steamcmdEnabled;
+        extern bool steamcmdUpdateSteamMods;
 
         //
         void load();
