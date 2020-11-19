@@ -71,13 +71,10 @@ MainWindow::MainWindow(QWidget *parent) :
             m->addSeparator();
         }
 
-        { /* new menu */ } {
-            auto mm = m->addMenu(qs("New instance"));
-            mm->addAction("From Steam Workshop collection...", this, [this] {
-                newFromWorkshop();
-            });
-        }
-        m->addAction(qs("Refresh"), this, [this] { refresh(); });
+        // carry over options from menu bar
+        m->addMenu(ui->menuNewInstance);
+        m->addSeparator();
+        m->addAction(ui->actionRefresh);
 
         m->setAttribute(Qt::WA_DeleteOnClose);
         m->popup(ui->instanceList->mapToGlobal(pt));
