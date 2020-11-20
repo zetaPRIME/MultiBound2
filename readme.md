@@ -2,9 +2,9 @@
 MultiBound enables you to quickly and easily set up and use multiple separate instances (or profiles) of Starbound with their own mod list and save directory.
 
 ## Installing and running
-- **Windows:** Unzip anywhere writable and double-click `multibound.exe`. *(builds coming eventually; I don't have a Windows machine)*
+- **Windows:** Unzip anywhere writable and double-click `multibound.exe`.
 - **Arch Linux:** Install `multibound-git` from the AUR; "MultiBound 2" will be added to your launcher.
-- **Other Linux/\*nix:** Clone from git and compile using QtCreator.
+- **Other Linux/\*nix:** Clone from git and compile using QtCreator like you would with any other Qt application.
 
 ## How to use
 (instructions pending; once you start it up it should be fairly self-explanatory, though!)
