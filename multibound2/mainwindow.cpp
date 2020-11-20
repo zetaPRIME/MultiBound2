@@ -32,6 +32,15 @@ using MultiBound::Instance;
 
 namespace {
     inline Instance* instanceFromItem(QListWidgetItem* itm) { return static_cast<Instance*>(itm->data(Qt::UserRole).value<void*>()); }
+
+    auto checkableEventFilter = new MultiBound::CheckableEventFilter();
+    void bindConfig(QAction* a, bool& f) {
+        a->setChecked(f);
+        QObject::connect(a, &QAction::triggered, a, [&f](bool b) {
+            f = b;
+            MultiBound::Config::save();
+        });
+    }
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -44,18 +53,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(new QShortcut(QKeySequence("Return"), ui->instanceList), &QShortcut::activated, this, [this] { launch(); });
 
     // hook up menus
+    for (auto m : ui->menuBar->children()) if (qobject_cast<QMenu*>(m)) m->installEventFilter(checkableEventFilter);
     ui->actionRefresh->shortcuts() << QKeySequence("F5");
     connect(ui->actionRefresh, &QAction::triggered, this, [this] { refresh(); });
     connect(ui->actionExit, &QAction::triggered, this, [this] { close(); });
     connect(ui->actionFromCollection, &QAction::triggered, this, [this] { newFromWorkshop(); });
 
     // settings
-    ui->menuConfig->installEventFilter(new CheckableEventFilter());
-    ui->actionUpdateSteamMods->setChecked(Config::steamcmdUpdateSteamMods);
-    connect(ui->actionUpdateSteamMods, &QAction::triggered, this, [](bool b) {
-        Config::steamcmdUpdateSteamMods = b;
-        Config::save();
-    });
+    bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
 
     // and context menu
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
