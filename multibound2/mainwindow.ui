@@ -85,7 +85,7 @@
    </widget>
    <widget class="QMenu" name="menuConfig">
     <property name="title">
-     <string>Config</string>
+     <string>Configuration</string>
     </property>
     <addaction name="actionUpdateSteamMods"/>
    </widget>
