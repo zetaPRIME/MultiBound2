@@ -6,6 +6,8 @@
 
 #include "util.h"
 
+#include "uitools.h"
+
 #include <memory>
 
 #include <QDebug>
@@ -48,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionFromCollection, &QAction::triggered, this, [this] { newFromWorkshop(); });
 
     // settings
+    ui->menuConfig->installEventFilter(new CheckableEventFilter());
     ui->actionUpdateSteamMods->setChecked(Config::steamcmdUpdateSteamMods);
     connect(ui->actionUpdateSteamMods, &QAction::triggered, this, [](bool b) {
         Config::steamcmdUpdateSteamMods = b;
