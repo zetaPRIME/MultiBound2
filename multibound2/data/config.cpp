@@ -54,6 +54,7 @@ void MultiBound::Config::load() {
         steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
 
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
+
         steamUsername = cfg["steamUsername"].toString(steamUsername);
         steamPassword = cfg["steamPassword"].toString(steamPassword);
     }
@@ -76,10 +77,11 @@ void MultiBound::Config::save() {
     cfg["starboundPath"] = starboundPath;
     cfg["instanceRoot"] = instanceRoot;
     cfg["steamcmdRoot"] = steamcmdDLRoot;
-    cfg["steamUsername"] = steamUsername;
-    cfg["steamPassword"] = steamPassword;
 
     cfg["steamcmdUpdateSteamMods"] = steamcmdUpdateSteamMods;
+
+    cfg["steamUsername"] = steamUsername;
+    cfg["steamPassword"] = steamPassword;
 
     QFile f(Util::splicePath(configPath, "/config.json"));
     f.open(QFile::WriteOnly);
