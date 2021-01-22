@@ -116,7 +116,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QString wsScript, dlScript;
     QTextStream wss(&wsScript), dls(&dlScript);
 
-    wss << qs("login anonymous\n");
+    wss << qs("login " << Config::steamUsername << " " << Config::steamPassword << "\n");
     if (ws) { // if valid workshop, force proper root in case steamcmd defaults are incorrect
         QDir wsr(Config::workshopRoot);
         for (int i = 0; i < 4; i++) wsr.cdUp();
