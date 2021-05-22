@@ -107,7 +107,7 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         {
             QString q = " \
                 (function(){ var res = [ ]; \
-                $('div.collectionChildren div.workshopBrowseRow > div[class^=\\'workshopItem\\'').each(function(){ \
+                $('div.collectionChildren div.collections > div[class^=\\'workshopItem\\'').each(function(){ \
                 res.push( $(this).find('a').attr('href') ); \
                 }); \
                 return res; })();";
