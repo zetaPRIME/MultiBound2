@@ -161,7 +161,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QObject::connect(scp, &QProcess::readyRead, [scp, wsc, &wsp] {
         while (scp->canReadLine()) {
             QString l = scp->readLine();
-            qDebug() << l;
+            //qDebug() << l;
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
