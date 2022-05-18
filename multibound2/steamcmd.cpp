@@ -116,13 +116,16 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QString wsScript, dlScript;
     QTextStream wss(&wsScript), dls(&dlScript);
 
-    wss << qs("login anonymous\n");
     if (ws) { // if valid workshop, force proper root in case steamcmd defaults are incorrect
         QDir wsr(Config::workshopRoot);
         for (int i = 0; i < 4; i++) wsr.cdUp();
         wss << qs("force_install_dir ") << wsr.absolutePath() << qs("\n");
     }
+    wss << qs("login anonymous\n"); // log in after forcing install dir
+    
+    dls << qs("logout"); // we need to set the install dir while logged out now (sigh)
     dls << qs("force_install_dir ") << Config::steamcmdDLRoot << qs("\n");
+    dls << qs("login anonymous\n");
 
     auto eh = qs("workshop_download_item 211820 ");
     for (auto id : workshop) {
