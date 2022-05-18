@@ -123,7 +123,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     }
     wss << qs("login anonymous\n"); // log in after forcing install dir
     
-    dls << qs("logout"); // we need to set the install dir while logged out now (sigh)
+    dls << qs("logout\n"); // we need to set the install dir while logged out now (sigh)
     dls << qs("force_install_dir ") << Config::steamcmdDLRoot << qs("\n");
     dls << qs("login anonymous\n");
 
