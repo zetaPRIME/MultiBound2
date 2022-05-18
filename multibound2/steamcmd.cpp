@@ -122,13 +122,12 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         wss << qs("force_install_dir ") << wsr.absolutePath() << qs("\n");
     }
     wss << qs("login anonymous\n"); // log in after forcing install dir
-    
-    dls << qs("logout\n"); // we need to set the install dir while logged out now (sigh)
+
     dls << qs("force_install_dir ") << Config::steamcmdDLRoot << qs("\n");
     dls << qs("login anonymous\n");
 
     auto eh = qs("workshop_download_item 211820 ");
-    for (auto id : workshop) {
+    for (auto& id : workshop) {
         if (!workshopExclude.contains(id)) {
             if (ws && QDir(Config::workshopRoot).exists(id)) {
                 if (wsUpd) { wss << eh << id << qs("\n"); wsc++; }
@@ -136,25 +135,33 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         }
     }
 
-    dls.flush();
-    wss << dlScript;
+    QString endcap = qs("_dummy\n"); // force last download attempt to fully print
+    wss << endcap;
     wss.flush();
+    dls << endcap;
+    dls.flush();
 
     QString scriptPath = QDir(Config::steamcmdDLRoot).filePath("steamcmd.txt");
-    QFile sf(scriptPath);
-    sf.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
-    (QTextStream(&sf)) << wsScript;
-    sf.close();
-
-    QStringList args;
-    args << "+runscript" << scriptPath << "+quit";
-    scp->setArguments(args);
+    {
+        QFile sf(scriptPath);
+        sf.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+        (QTextStream(&sf)) << wsScript;
+        sf.close();
+    }
+    QString scriptPath2 = QDir(Config::steamcmdDLRoot).filePath("steamcmd2.txt");
+    {
+        QFile sf(scriptPath2);
+        sf.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+        (QTextStream(&sf)) << dlScript;
+        sf.close();
+    }
 
     int wsp = 0;
     updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
     QObject::connect(scp, &QProcess::readyRead, [scp, wsc, &wsp] {
         while (scp->canReadLine()) {
             QString l = scp->readLine();
+            qDebug() << l;
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
@@ -162,6 +169,17 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         }
     });
 
-    scp->start();
-    ev.exec();
+    /* / run workshop-update script */ {
+        QStringList args;
+        args << "+runscript" << scriptPath << "+quit";
+        scp->setArguments(args);
+        scp->start();
+        ev.exec();
+    } /* and then the custom-download one */ {
+        QStringList args;
+        args << "+runscript" << scriptPath2 << "+quit";
+        scp->setArguments(args);
+        scp->start();
+        ev.exec();
+    }
 }
