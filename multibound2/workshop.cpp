@@ -23,12 +23,6 @@ namespace { // utilities
         pt.setBody(val.toUtf8());
         return pt;
     }
-
-    QHttpPart endPart() {
-        QHttpPart pt;
-        pt.setHeader(QNetworkRequest::ContentDispositionHeader, qs("form-data"));
-        return pt;
-    }
 }
 
 void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save) {
@@ -57,7 +51,6 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         form.append(formPart(qs("collectioncount"), QString::number(ids.count())));
         for (auto i = 0; i < ids.count(); ++i)
             form.append(formPart(qs("publishedfileids[%1]").arg(i), ids[i]));
-        form.append(endPart());
 
         req.setHeader(QNetworkRequest::ContentTypeHeader, qs("multipart/form-data; boundary=%1").arg(QString::fromUtf8(form.boundary())));
 
@@ -76,7 +69,6 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         form.append(formPart(qs("itemcount"), QString::number(ids.count())));
         for (auto i = 0; i < ids.count(); ++i)
             form.append(formPart(qs("publishedfileids[%1]").arg(i), ids[i]));
-        form.append(endPart());
 
         req.setHeader(QNetworkRequest::ContentTypeHeader, qs("multipart/form-data; boundary=%1").arg(QString::fromUtf8(form.boundary())));
 
