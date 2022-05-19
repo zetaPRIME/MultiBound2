@@ -6,6 +6,15 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QBoxLayout>
+#include <QLabel>
+#include <QMessageBox>
+
+#include <QMetaObject>
 #include <QProcess>
 #include <QFile>
 #include <QEventLoop>
@@ -16,13 +25,26 @@
 
 #include <QSet>
 
-namespace {
+namespace { // clazy:excludeall=non-pod-global-static
     const auto updMsg = qs("Updating mods...");
+    QProcess* scp;
+    QEventLoop ev;
+
+    bool scFail = true;
+
+    // these are only saved for the session
+    QString triedUserName;
+    QString triedPassword;
 }
 
-void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
-    auto scp = new QProcess();
-    QEventLoop ev;
+bool MultiBound::Util::initSteamCmd() {
+    if (!Config::steamcmdEnabled) return false; // don't bother if it's disabled
+    if (scp) {
+        if (scFail) return false; // could not init steamcmd
+        return true; // already initialized
+    }
+
+    scp = new QProcess();
     QObject::connect(scp, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &ev, &QEventLoop::quit);
 #if defined(Q_OS_WIN)
     QDir scd(Config::configPath);
@@ -37,7 +59,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         ev.exec();
         scp->start("powershell", QStringList() << "Expand-Archive"<< "-DestinationPath" << scd.absolutePath() << "-LiteralPath" << scz);
         ev.exec();
-        if (scp->exitCode() != 0) return; // extraction failed for some reason or another, abort
+        if (scp->exitCode() != 0) return false; // extraction failed for some reason or another, abort
 
         // finish installing
         updateStatus(qs("Installing steamcmd..."));
@@ -71,7 +93,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
             scp->setWorkingDirectory(scd.absolutePath());
             scp->start("bash", QStringList() << "-c" << qs("curl -sqL \"%1\" | tar -xzvf -").arg(scUrl));
             ev.exec();
-            if (scp->exitCode() != 0) return; // something went wrong, abort
+            if (scp->exitCode() != 0) return false; // something went wrong, abort
 
             // finish installing
             updateStatus(qs("Installing steamcmd..."));
@@ -85,6 +107,12 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         scp->setWorkingDirectory(scd.absolutePath());
     }
 #endif
+    scFail = false;
+    return true;
+}
+
+void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
+    if (!initSteamCmd()) return;
 
     updateStatus(updMsg);
 
@@ -156,15 +184,21 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         sf.close();
     }
 
+    std::unique_ptr<QObject> ctx(new QObject());
+
     int wsp = 0;
     updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
-    QObject::connect(scp, &QProcess::readyRead, [scp, wsc, &wsp] {
+    QObject::connect(scp, &QProcess::readyRead, ctx.get(), [wsc, &wsp, &ctx] { // clazy:exclude=lambda-in-connect
         while (scp->canReadLine()) {
             QString l = scp->readLine();
             //qDebug() << l;
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
+            } else if (l.contains("Missing decryption key")) {
+                ctx.reset();
+                scp->close(); // abort
+                return;
             }
         }
     });
@@ -175,11 +209,124 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         scp->setArguments(args);
         scp->start();
         ev.exec();
-    } /* and then the custom-download one */ {
+    } /* and then the custom-download one */ if (ctx) {
         QStringList args;
         args << "+runscript" << scriptPath2 << "+quit";
         scp->setArguments(args);
         scp->start();
         ev.exec();
     }
+
+    if (!ctx) { // missing decryption key
+        if (setUpDecryptionKey()) updateMods(inst);
+    }
 }
+
+bool MultiBound::Util::setUpDecryptionKey() {
+    if (!initSteamCmd()) return false;
+
+    std::unique_ptr<QDialog> dlg(new QDialog());
+    dlg->setModal(true);
+    dlg->setWindowTitle("Log into Steam");
+
+    auto dl = new QVBoxLayout();
+    dlg->setLayout(dl);
+
+    auto usnl = new QHBoxLayout();
+    dl->addLayout(usnl);
+    auto usnc = new QLabel("Username");
+    usnl->addWidget(usnc);
+    auto usn = new QLineEdit(triedUserName);
+    usnl->addWidget(usn);
+
+    auto pwl = new QHBoxLayout();
+    dl->addLayout(pwl);
+    auto pwc = new QLabel("Password");
+    pwl->addWidget(pwc);
+    auto pw = new QLineEdit(triedPassword);
+    pwl->addWidget(pw);
+    pw->setEchoMode(QLineEdit::Password);
+
+    auto lw = 64;
+    usnc->setFixedWidth(lw);
+    pwc->setFixedWidth(lw);
+
+    auto inf = new QLabel("In order to download mods, steamcmd needs to obtain the decryption key by logging into a Steam account that owns Starbound. You should only need to do this once.\n\nYour login information is kept only for this session. It is never saved, only passed directly into steamcmd.");
+    dl->addWidget(inf);
+    inf->setMaximumWidth(500);
+    inf->setWordWrap(true);
+
+    auto bbox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    dl->addWidget(bbox);
+    QObject::connect(bbox, &QDialogButtonBox::rejected, dlg.get(), &QDialog::reject);
+    QObject::connect(bbox, &QDialogButtonBox::accepted, dlg.get(), [=, dlg = dlg.get()] {
+        dlg->accept();
+    });
+
+    dlg->exec();
+
+    if (dlg->result() != QDialog::Accepted) return false;
+    triedUserName = usn->text();
+    triedPassword = pw->text();
+    if (triedUserName.isEmpty()) return false;
+
+    QStringList args;
+    args << "+force_install_dir" << Config::steamcmdDLRoot;
+    args << "+login" << triedUserName << triedPassword;
+    args << "+workshop_download_item" << "211820" << "2512589532"; // we'll use Stardust Core Lite for this
+    args << "+_dummy"; // dummy line
+    args << "+exit";
+
+    std::unique_ptr<QObject> ctx(new QObject());
+
+    QObject::connect(scp, &QProcess::readyRead, ctx.get(), [&ctx] { // clazy:exclude=lambda-in-connect
+        while (scp->canReadLine()) {
+            QString l = scp->readLine();
+            //qDebug() << l;
+            if (l.contains("Missing decryption key")) {
+                ctx.reset();
+                scp->close(); // abort
+                QMessageBox::critical(nullptr, "Setup Failed", "Could not fetch decryption key (account does not own Starbound).");
+                return;
+            } else if (l.contains("FAILED (Invalid Password)")) {
+                ctx.reset();
+                scp->close(); // abort
+                QMessageBox::critical(nullptr, "Setup Failed", "Could not fetch decryption key (invalid credentials).");
+                return;
+            }
+        }
+    });
+
+
+    scp->setArguments(args);
+    scp->start();
+    ev.exec();
+
+    if (!ctx) return false; // failure
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//

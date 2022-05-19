@@ -26,7 +26,9 @@ namespace MultiBound {
         }
         void updateFromWorkshop(Instance*, bool save = true);
 
+        bool initSteamCmd();
         void updateMods(Instance*);
+        bool setUpDecryptionKey();
 
         extern std::function<void(QString)> updateStatus;
     }

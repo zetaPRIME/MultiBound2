@@ -62,6 +62,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // settings
     bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
 
+    ui->menuConfig->addAction("Set up Steam decryption key", [this] {
+        setInteractive(false);
+        Util::setUpDecryptionKey();
+        setInteractive(true);
+    });
+
     // and context menu
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
         auto m = new QMenu(this);
