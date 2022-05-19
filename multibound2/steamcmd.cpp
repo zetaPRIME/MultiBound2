@@ -251,7 +251,7 @@ bool MultiBound::Util::setUpDecryptionKey() {
     usnc->setFixedWidth(lw);
     pwc->setFixedWidth(lw);
 
-    auto inf = new QLabel("In order to download mods, steamcmd needs to obtain the decryption key by logging into a Steam account that owns Starbound. You should only need to do this once.\n\nYour login information is kept only for this session. It is never saved, only passed directly into steamcmd.");
+    auto inf = new QLabel("In order to download mods, steamcmd needs to obtain the decryption key by logging into a Steam account that owns Starbound. You should only need to do this once.\n\nYour login information is kept only for this session, and is never saved to disk.");
     dl->addWidget(inf);
     inf->setMaximumWidth(500);
     inf->setWordWrap(true);
