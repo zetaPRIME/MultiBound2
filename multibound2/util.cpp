@@ -47,8 +47,8 @@ vdf::basic_object<char>* MultiBound::Util::vdfPath(vdf::basic_object<char>* obj,
         if (!next) {
             if (!create) return nullptr;
             next = std::make_shared<vdf::basic_object<char>>();
-            next->set_name(tks);
-            cur->childs.emplace(tks, next);
+            next->name = tks;
+            cur->childs[tks] = next;
         }
         cur = next.get();
     }

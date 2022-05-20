@@ -118,30 +118,23 @@ bool MultiBound::Util::initSteamCmd() {
 #endif
     if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
         QDir cpd(scConfigPath);
-        QMessageBox::information(nullptr, qs("config path qdir is: %1").arg(cpd.absolutePath()), " ");
         cpd.cdUp();
         cpd.mkpath(".");
 
-        QMessageBox::information(nullptr, "after mkpath", " ");
-
-        { QFile f(scConfigPath); f.open(QFile::ReadWrite); }
+        { QFile f(scConfigPath); f.open(QFile::ReadWrite); } // ensure the file exists
         std::ifstream ifs(scConfigPath.toStdString());
         auto doc = tyti::vdf::read(ifs);
         ifs.close();
 
-        QMessageBox::information(nullptr, "after read in", " ");
-
-        doc.set_name("InstallConfigStore");
+        doc.set_name("InstallConfigStore"); // ensure root name is correct
 
         auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
         depot->add_attribute("DecryptionKey", Config::workshopDecryptionKey.toStdString());
 
-        QMessageBox::information(nullptr, "after insertion", " ");
-
         std::ofstream ofs(scConfigPath.toStdString());
         tyti::vdf::write(ofs, doc);
-
-        QMessageBox::information(nullptr, "after write out", " ");
+        ofs.flush();
+        ofs.close();
     }
     scFail = false;
     return true;
