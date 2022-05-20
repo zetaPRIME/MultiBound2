@@ -3,6 +3,8 @@
 #include "data/config.h"
 #include "data/instance.h"
 
+#include "inclib/vdf_parser.hpp"
+
 #include <QJsonDocument>
 #include <QJsonArray>
 
@@ -17,6 +19,7 @@
 #include <QMetaObject>
 #include <QProcess>
 #include <QFile>
+#include <QStandardPaths>
 #include <QEventLoop>
 
 #include <QNetworkAccessManager>
@@ -31,6 +34,8 @@ namespace { // clazy:excludeall=non-pod-global-static
     QEventLoop ev;
 
     bool scFail = true;
+
+    QString scConfigPath;
 
     // these are only saved for the session
     QString triedUserName;
@@ -71,11 +76,14 @@ bool MultiBound::Util::initSteamCmd() {
     }
     scp->setProgram(scd.absoluteFilePath("steamcmd.exe"));
     scp->setWorkingDirectory(scd.absolutePath());
+    scConfigPath = Util::splicePath(scd.absolutePath(), "/config/config.vdf");
 #else
     // test with standard "which" command on linux and mac
     if (scp->execute("which", QStringList() << "steamcmd") == 0) { // use system steamcmd if present
         scp->readAll(); // clear buffer
         scp->setProgram("steamcmd");
+        QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+        scConfigPath = Util::splicePath(home, "/.steam/steam/config/config.vdf");
     } else { // use our own copy, and install automatically if necessary
         scp->readAll(); // clear buffer
 
@@ -105,8 +113,24 @@ bool MultiBound::Util::initSteamCmd() {
         }
         scp->setProgram(scd.absoluteFilePath("steamcmd.sh"));
         scp->setWorkingDirectory(scd.absolutePath());
+        scConfigPath = Util::splicePath(scd.absolutePath(), "/config/config.vdf");
     }
 #endif
+    if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
+        QDir cpd(scConfigPath);
+        cpd.cdUp();
+        cpd.mkpath(".");
+
+        std::ifstream ifs(scConfigPath.toStdString());
+        auto doc = tyti::vdf::read(ifs);
+        ifs.close();
+
+        auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
+        depot->add_attribute("DecryptionKey", Config::workshopDecryptionKey.toStdString());
+
+        std::ofstream ofs(scConfigPath.toStdString());
+        tyti::vdf::write(ofs, doc);
+    }
     scFail = false;
     return true;
 }
@@ -195,7 +219,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
-            } else if (l.contains("Missing decryption key")) {
+            } else if (l.contains("Missing decryption key") || l.contains("failed (Failure).")) {
                 ctx.reset();
                 scp->close(); // abort
                 return;
@@ -218,7 +242,8 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     }
 
     if (!ctx) { // missing decryption key
-        if (setUpDecryptionKey()) updateMods(inst);
+        QMessageBox::critical(nullptr, " ", "Failed to download one or more mods. This may be due to Steam maintenance, or due to a missing decryption key. (If you have the Steam version of Starbound, you should have this if your machine has ever downloaded a Workshop mod.)");
+        //if (setUpDecryptionKey()) updateMods(inst);
     }
 }
 

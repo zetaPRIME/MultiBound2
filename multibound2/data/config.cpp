@@ -2,6 +2,8 @@
 
 #include "util.h"
 
+#include "inclib/vdf_parser.hpp"
+
 #include <QDir>
 #include <QStandardPaths>
 #include <QCoreApplication>
@@ -19,8 +21,12 @@ QString MultiBound::Config::steamcmdWorkshopRoot;
 QString MultiBound::Config::starboundPath;
 QString MultiBound::Config::starboundRoot;
 
+QString MultiBound::Config::workshopDecryptionKey;
+
 bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
+
+namespace vdf = tyti::vdf;
 
 void MultiBound::Config::load() {
     // defaults
@@ -51,6 +57,8 @@ void MultiBound::Config::load() {
         instanceRoot = cfg["instanceRoot"].toString(instanceRoot);
         steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
 
+        workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey);
+
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
     }
 
@@ -65,6 +73,26 @@ void MultiBound::Config::load() {
 
     steamcmdWorkshopRoot = Util::splicePath(QDir(steamcmdDLRoot).absolutePath(), "/steamapps/workshop/content/211820/");
 
+    if (workshopDecryptionKey.isEmpty()) { // attempt to pull key from Steam
+        QString vdfLoc;
+        // just default locations for now
+        // TODO: figure out mac
+        // TODO: go by registry on Windows
+#if defined(Q_OS_WIN)
+        vdfLoc = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/config/config.vdf"));
+#else
+        vdfLoc = Util::splicePath(home, "/.steam/steam/config/config.vdf");
+#endif
+
+        if (QFile f(vdfLoc); f.exists()) {
+            std::ifstream s(vdfLoc.toStdString());
+            auto doc = vdf::read(s);
+            auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
+            auto cc = depot->attribs["DecryptionKey"];
+            workshopDecryptionKey = QString::fromStdString(cc);
+            if (!workshopDecryptionKey.isEmpty()) save();
+        }
+    }
 }
 
 void MultiBound::Config::save() {
@@ -72,6 +100,8 @@ void MultiBound::Config::save() {
     cfg["starboundPath"] = starboundPath;
     cfg["instanceRoot"] = instanceRoot;
     cfg["steamcmdRoot"] = steamcmdDLRoot;
+
+    cfg["workshopDecryptionKey"] = workshopDecryptionKey;
 
     cfg["steamcmdUpdateSteamMods"] = steamcmdUpdateSteamMods;
 
