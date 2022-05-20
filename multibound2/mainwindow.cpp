@@ -30,7 +30,7 @@
 using MultiBound::MainWindow;
 using MultiBound::Instance;
 
-namespace {
+namespace { // clazy:excludeall=non-pod-global-static
     inline Instance* instanceFromItem(QListWidgetItem* itm) { return static_cast<Instance*>(itm->data(Qt::UserRole).value<void*>()); }
 
     auto checkableEventFilter = new MultiBound::CheckableEventFilter();
@@ -62,7 +62,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // settings
     bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
 
-    ui->menuConfig->addAction("Set up Steam decryption key", [this] {
+    ui->menuConfig->addAction("Set up Steam decryption key", this, [this] {
+        if (!Config::steamcmdEnabled) {
+            QMessageBox::warning(this, " ", "Steam integration is currently disabled.");
+            return;
+        }
         setInteractive(false);
         Util::setUpDecryptionKey();
         setInteractive(true);
@@ -76,12 +80,12 @@ MainWindow::MainWindow(QWidget *parent) :
             auto inst = instanceFromItem(i);
             m->addAction(qs("Launch instance"), this, [this, inst] { launch(inst); });
             if (auto id = inst->workshopId(); !id.isEmpty()) {
-                m->addAction(qs("Update from Workshop collection"), [this, inst] { updateFromWorkshop(inst); });
-                m->addAction(qs("Open Workshop link..."), [id] {
+                m->addAction(qs("Update from Workshop collection"), m, [this, inst] { updateFromWorkshop(inst); });
+                m->addAction(qs("Open Workshop link..."), m, [id] {
                     QDesktopServices::openUrl(QUrl(Util::workshopLinkFromId(id)));
                 });
             }
-            m->addAction(qs("Open instance directory"), [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
+            m->addAction(qs("Open instance directory"), m, [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
             m->addSeparator();
         }
 
@@ -153,7 +157,7 @@ void MainWindow::refresh(const QString& focusPath) {
     QDir d(Config::instanceRoot);
     auto lst = d.entryList(QDir::Dirs);
     instances.reserve(static_cast<size_t>(lst.count()));
-    for (auto idir : lst) {
+    for (auto& idir : lst) {
         auto inst = Instance::loadFrom(idir);
         if (!inst) continue;
         instances.push_back(inst);
@@ -188,7 +192,7 @@ void MainWindow::newFromWorkshop(const QString& id_) {
     auto id = id_;
     if (id.isEmpty()) { // prompt
         bool ok = false;
-        auto link = QInputDialog::getText(this, qs("Enter collection link"), qs("Enter a link to a Steam Workshop collection:"), QLineEdit::Normal, qs(), &ok);
+        auto link = QInputDialog::getText(this, qs("Enter collection link"), qs("Enter a link to a Steam Workshop collection:"), QLineEdit::Normal, QString(), &ok);
         id = Util::workshopIdFromLink(link);
         if (!ok || id.isEmpty()) return;
     }
