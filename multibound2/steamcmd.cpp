@@ -125,9 +125,12 @@ bool MultiBound::Util::initSteamCmd() {
         auto doc = tyti::vdf::read(ifs);
         ifs.close();
 
+        doc.set_name("InstallConfigStore");
+
         auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
         depot->add_attribute("DecryptionKey", Config::workshopDecryptionKey.toStdString());
 
+        { QFile f(scConfigPath); f.open(QFile::ReadWrite); }
         std::ofstream ofs(scConfigPath.toStdString());
         tyti::vdf::write(ofs, doc);
     }
