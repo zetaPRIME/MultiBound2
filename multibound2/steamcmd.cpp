@@ -76,14 +76,14 @@ bool MultiBound::Util::initSteamCmd() {
     }
     scp->setProgram(scd.absoluteFilePath("steamcmd.exe"));
     scp->setWorkingDirectory(scd.absolutePath());
-    scConfigPath = Util::splicePath(scd.absolutePath(), "/config/config.vdf");
+    scConfigPath = Util::splicePath(scd.absolutePath(), "/config/");
 #else
     // test with standard "which" command on linux and mac
     if (scp->execute("which", QStringList() << "steamcmd") == 0) { // use system steamcmd if present
         scp->readAll(); // clear buffer
         scp->setProgram("steamcmd");
         QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
-        scConfigPath = Util::splicePath(home, "/.steam/steam/config/config.vdf");
+        scConfigPath = Util::splicePath(home, "/.steam/steam/config/");
     } else { // use our own copy, and install automatically if necessary
         scp->readAll(); // clear buffer
 
@@ -113,16 +113,18 @@ bool MultiBound::Util::initSteamCmd() {
         }
         scp->setProgram(scd.absoluteFilePath("steamcmd.sh"));
         scp->setWorkingDirectory(scd.absolutePath());
-        scConfigPath = Util::splicePath(scd.absolutePath(), "/config/config.vdf");
+        scConfigPath = Util::splicePath(scd.absolutePath(), "/config/");
     }
 #endif
     if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
         QDir cpd(scConfigPath);
-        cpd.cdUp();
+        //qDebug() << cpd.absolutePath();
+        //cpd.cdUp();
         cpd.mkpath(".");
 
-        { QFile f(scConfigPath); f.open(QFile::ReadWrite); } // ensure the file exists
-        std::ifstream ifs(scConfigPath.toStdString());
+        auto fp = cpd.absoluteFilePath("config.vdf");
+        { QFile f(fp); f.open(QFile::ReadWrite); } // ensure the file exists
+        std::ifstream ifs(fp.toStdString());
         auto doc = tyti::vdf::read(ifs);
         ifs.close();
 
@@ -131,7 +133,7 @@ bool MultiBound::Util::initSteamCmd() {
         auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
         depot->add_attribute("DecryptionKey", Config::workshopDecryptionKey.toStdString());
 
-        std::ofstream ofs(scConfigPath.toStdString());
+        std::ofstream ofs(fp.toStdString());
         tyti::vdf::write(ofs, doc);
         ofs.flush();
         ofs.close();
