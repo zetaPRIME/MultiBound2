@@ -105,14 +105,15 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
             }
 
             if (needsExtCfg) { // find extcfg block
-                needsExtCfg = false;
-
                 auto desc = inf["description"].toString();
 
                 static QRegularExpression xcm("\\[code\\]\\[noparse\\]([\\S\\s]*)\\[\\/noparse\\]\\[\\/code\\]");
                 xcm.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
                 auto xc = xcm.match(desc).captured(1);
-                if (!xc.isEmpty()) json["extCfg"] = Util::parseJson(xc.toUtf8()).object();
+                if (!xc.isEmpty()) {
+                    needsExtCfg = false;
+                    json["extCfg"] = Util::parseJson(xc.toUtf8()).object();
+                }
             }
         }
 
