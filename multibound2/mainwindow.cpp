@@ -62,16 +62,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // settings
     bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
 
-    ui->menuConfig->addAction("Set up Steam decryption key", this, [this] {
-        if (!Config::steamcmdEnabled) {
-            QMessageBox::warning(this, " ", "Steam integration is currently disabled.");
-            return;
-        }
-        setInteractive(false);
-        Util::setUpDecryptionKey();
-        setInteractive(true);
-    });
-
     // and context menu
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
         auto m = new QMenu(this);
