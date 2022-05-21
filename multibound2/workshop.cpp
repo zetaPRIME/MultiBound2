@@ -10,6 +10,7 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QRegularExpression>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -91,15 +92,28 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
         wsVisited.insert(cId);
 
         auto obj = getCollectionDetails(QStringList() << cId);
-
-        if (needsInfo) { // update display name and title from html
-            needsInfo = false;
-
+        if (needsInfo || needsExtCfg) {
             auto inf = getItemDetails(QStringList() << cId)["publishedfiledetails"].toArray()[0].toObject();
-            auto name = inf["title"].toString();
 
-            info["name"] = name;
-            info["windowTitle"] = qs("Starbound - %1").arg(name);
+            if (needsInfo) { // update display name and title from html
+                needsInfo = false;
+
+                auto name = inf["title"].toString();
+
+                info["name"] = name;
+                info["windowTitle"] = qs("Starbound - %1").arg(name);
+            }
+
+            if (needsExtCfg) { // find extcfg block
+                needsExtCfg = false;
+
+                auto desc = inf["description"].toString();
+
+                static QRegularExpression xcm("\\[code\\]\\[noparse\\]([\\S\\s]*)\\[\\/noparse\\]\\[\\/code\\]");
+                xcm.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+                auto xc = xcm.match(desc).captured(1);
+                if (!xc.isEmpty()) json["extCfg"] = Util::parseJson(xc.toUtf8()).object();
+            }
         }
 
         auto children = obj["collectiondetails"].toArray()[0].toObject()["children"].toArray();
@@ -115,11 +129,6 @@ void MultiBound::Util::updateFromWorkshop(MultiBound::Instance* inst, bool save)
             }
         }
 
-        if (needsExtCfg) { // find extcfg block
-            needsExtCfg = false;
-
-            //json["extCfg"] = queryPage("eval('json_out = ' + $('div.workshopItemDescriptionForCollection div.bb_code').last().html().replace(/<br>/gi,'\\n') + '; json_out')").toJsonObject();
-        }
     }
 
     if (modInfoQueue.size() > 0) {
