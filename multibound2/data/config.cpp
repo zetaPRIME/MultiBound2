@@ -30,7 +30,7 @@ bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 namespace vdf = tyti::vdf;
 
 namespace {
-    inline bool isX64() { return QSysInfo::currentCpuArchitecture().contains(QLatin1String("64")); }
+    [[maybe_unused]] inline bool isX64() { return QSysInfo::currentCpuArchitecture().contains(QLatin1String("64")); }
 }
 
 void MultiBound::Config::load() {
