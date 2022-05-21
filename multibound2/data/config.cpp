@@ -96,6 +96,8 @@ void MultiBound::Config::load() {
         // TODO: figure out mac
 #if defined(Q_OS_WIN)
         vdfLoc = Util::splicePath(steamPath, "/config/config.vdf"); // found via registry
+#elif defined (Q_OS_MACOS)
+        vdfLoc = Util::splicePath(home, "/Library/Application Support/Steam/config/config.vdf");
 #else
         vdfLoc = Util::splicePath(home, "/.steam/steam/config/config.vdf");
 #endif
