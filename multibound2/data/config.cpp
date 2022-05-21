@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QCoreApplication>
+#include <QSettings>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -28,14 +29,30 @@ bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
 namespace vdf = tyti::vdf;
 
+namespace {
+    inline bool isX64() { return QSysInfo::currentCpuArchitecture().contains(QLatin1String("64")); }
+}
+
 void MultiBound::Config::load() {
     // defaults
     configPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation); // already has "multibound" attached
 #if defined(Q_OS_WIN)
-    //; // same place as the exe on windows, like mb1
+    // same place as the exe on windows, like mb1
     if (QDir(QCoreApplication::applicationDirPath()).exists("config.json"))
         configPath = QCoreApplication::applicationDirPath();
-    starboundPath = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/SteamApps/common/Starbound/win64/starbound.exe"));
+
+    // find Steam path
+#if defined(Q_PROCESSOR_X86_64)
+    QSettings sreg(R"(HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam)", QSettings::NativeFormat);
+    QString steamPath = QDir::cleanPath(qs("C:/Program Files (x86)/Steam"));
+#else
+    QSettings sreg(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam)", QSettings::NativeFormat);
+    QString steamPath = QDir::cleanPath(qs("C:/Program Files/Steam"));
+#endif
+    if (auto ip = sreg.value("InstallPath"); ip.type() == QVariant::String && !ip.isNull()) steamPath = QDir::cleanPath(ip.toString());
+
+    if (isX64()) starboundPath = Util::splicePath(steamPath, "/SteamApps/common/Starbound/win64/starbound.exe");
+    else starboundPath = Util::splicePath(steamPath, "/SteamApps/common/Starbound/win32/starbound.exe");
 #elif defined(Q_OS_MACOS)
     QDir home(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
     starboundPath = Util::splicePath(home, "/Library/Application Support/Steam/steamapps/common/Starbound/osx/Starbound.app/Contents/MacOS/starbound");
@@ -77,9 +94,8 @@ void MultiBound::Config::load() {
         QString vdfLoc;
         // just default locations for now
         // TODO: figure out mac
-        // TODO: go by registry on Windows
 #if defined(Q_OS_WIN)
-        vdfLoc = QDir::cleanPath(qs("C:/Program Files (x86)/Steam/config/config.vdf"));
+        vdfLoc = Util::splicePath(steamPath, "/config/config.vdf"); // found via registry
 #else
         vdfLoc = Util::splicePath(home, "/.steam/steam/config/config.vdf");
 #endif
