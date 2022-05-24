@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>MultiBound::MainWindow</class>
+ <widget class="QMainWindow" name="MultiBound::MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -65,16 +65,16 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <widget class="QMenu" name="menuNewInstance">
      <property name="title">
-      <string>New instance</string>
+      <string>&amp;New instance</string>
      </property>
      <addaction name="actionFromCollection"/>
     </widget>
@@ -85,9 +85,11 @@
    </widget>
    <widget class="QMenu" name="menuConfig">
     <property name="title">
-     <string>Configuration</string>
+     <string>&amp;Configuration</string>
     </property>
     <addaction name="actionUpdateSteamMods"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConfig"/>
@@ -95,7 +97,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionRefresh">
    <property name="text">
-    <string>Refresh</string>
+    <string>&amp;Refresh</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -108,7 +110,7 @@
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>E&amp;xit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -121,7 +123,7 @@
   </action>
   <action name="actionFromCollection">
    <property name="text">
-    <string>From Steam Workshop collection...</string>
+    <string>From Steam Workshop &amp;collection...</string>
    </property>
   </action>
   <action name="actionUpdateSteamMods">
@@ -129,7 +131,12 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Update mods installed by Steam</string>
+    <string>&amp;Update mods installed by Steam</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>&amp;Settings...</string>
    </property>
   </action>
  </widget>

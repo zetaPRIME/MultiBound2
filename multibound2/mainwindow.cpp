@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "settingswindow.h"
+
 #include "data/config.h"
 #include "data/instance.h"
 
@@ -61,6 +63,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // settings
     bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
+    connect(ui->actionSettings, &QAction::triggered, this, [ ] {
+        if (SettingsWindow::instance) {
+            SettingsWindow::instance->show();
+            SettingsWindow::instance->raise();
+            SettingsWindow::instance->activateWindow();
+        } else (new SettingsWindow)->show();
+    });
 
     // and context menu
     connect(ui->instanceList, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pt) {
@@ -68,14 +77,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if (auto i = ui->instanceList->itemAt(pt); i) {
             auto inst = instanceFromItem(i);
-            m->addAction(qs("Launch instance"), this, [this, inst] { launch(inst); });
+            m->addAction(qs("&Launch instance"), this, [this, inst] { launch(inst); });
             if (auto id = inst->workshopId(); !id.isEmpty()) {
-                m->addAction(qs("Update from Workshop collection"), m, [this, inst] { updateFromWorkshop(inst); });
-                m->addAction(qs("Open Workshop link..."), m, [id] {
+                m->addAction(qs("&Update from Workshop collection"), m, [this, inst] { updateFromWorkshop(inst); });
+                m->addAction(qs("Open &Workshop link..."), m, [id] {
                     QDesktopServices::openUrl(QUrl(Util::workshopLinkFromId(id)));
                 });
             }
-            m->addAction(qs("Open instance directory"), m, [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
+            m->addAction(qs("&Open instance directory..."), m, [inst] { QDesktopServices::openUrl(QUrl::fromLocalFile(inst->path)); });
             m->addSeparator();
         }
 

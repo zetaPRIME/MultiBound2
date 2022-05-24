@@ -7,11 +7,8 @@
 
 class QListWidgetItem;
 
-namespace Ui {
-    class MainWindow;
-}
-
 namespace MultiBound {
+    namespace Ui { class MainWindow; }
     class Instance;
     class MainWindow : public QMainWindow {
         Q_OBJECT
