@@ -36,6 +36,9 @@
      </property>
      <item row="4" column="0" colspan="2">
       <widget class="QLineEdit" name="workshopDecryptionKey">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The decryption key required for MultiBound to download and update Steam Workshop mods.&lt;/p&gt;&lt;p&gt;This is obtained from your Steam installation on startup; if for whatever reason no valid key could be found automatically, it may be entered manually.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="inputMask">
         <string>&lt;hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</string>
        </property>
