@@ -12,6 +12,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <QCryptographicHash>
+
 #include <QDebug>
 
 QString MultiBound::Config::configPath;
@@ -74,7 +76,7 @@ void MultiBound::Config::load() {
         instanceRoot = cfg["instanceRoot"].toString(instanceRoot);
         steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
 
-        workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey);
+        workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey).toLower().trimmed();
 
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
     }
@@ -90,10 +92,11 @@ void MultiBound::Config::load() {
 
     steamcmdWorkshopRoot = Util::splicePath(QDir(steamcmdDLRoot).absolutePath(), "/steamapps/workshop/content/211820/");
 
+    verify();
+
     if (workshopDecryptionKey.isEmpty()) { // attempt to pull key from Steam
         QString vdfLoc;
-        // just default locations for now
-        // TODO: figure out mac
+
 #if defined(Q_OS_WIN)
         vdfLoc = Util::splicePath(steamPath, "/config/config.vdf"); // found via registry
 #elif defined (Q_OS_MACOS)
@@ -107,10 +110,20 @@ void MultiBound::Config::load() {
             auto doc = vdf::read(s);
             auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
             auto cc = depot->attribs["DecryptionKey"];
-            workshopDecryptionKey = QString::fromStdString(cc);
-            if (!workshopDecryptionKey.isEmpty()) save();
+            workshopDecryptionKey = QString::fromStdString(cc).toLower().trimmed();
+
+            verify(); // verify again to ensure we're not getting junk data
+
+            save(); // and save our goods
         }
     }
+    //
+}
+
+void MultiBound::Config::verify() {
+    // verify we have the correct key
+    if (workshopDecryptionKey.length() != 64 || QCryptographicHash::hash(workshopDecryptionKey.toUtf8(), QCryptographicHash::Md5).toHex() != "bce8596dc678e8fd56dbdf9b46652b2b")
+        workshopDecryptionKey = QString();
 }
 
 void MultiBound::Config::save() {
