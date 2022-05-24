@@ -112,8 +112,6 @@ void MultiBound::Config::load() {
             auto cc = depot->attribs["DecryptionKey"];
             workshopDecryptionKey = QString::fromStdString(cc).toLower().trimmed();
 
-            verify(); // verify again to ensure we're not getting junk data
-
             save(); // and save our goods
         }
     }
@@ -127,6 +125,8 @@ void MultiBound::Config::verify() {
 }
 
 void MultiBound::Config::save() {
+    verify();
+
     QJsonObject cfg;
     cfg["starboundPath"] = starboundPath;
     cfg["instanceRoot"] = instanceRoot;

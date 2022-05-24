@@ -10,13 +10,15 @@ namespace MultiBound {
         Q_OBJECT
 
     public:
+        static QPointer<SettingsWindow> instance;
+
         explicit SettingsWindow(QWidget *parent = nullptr);
         ~SettingsWindow();
 
-        static QPointer<SettingsWindow> instance;
-
     private:
         Ui::SettingsWindow *ui;
+
+        void apply();
     };
 
 }

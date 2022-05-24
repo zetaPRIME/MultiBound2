@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPointer>
 
 #include <memory>
 #include <vector>
@@ -14,6 +15,7 @@ namespace MultiBound {
         Q_OBJECT
 
     public:
+        static QPointer<MainWindow> instance;
         std::vector<std::shared_ptr<Instance>> instances;
 
         explicit MainWindow(QWidget* parent = nullptr);
@@ -21,17 +23,20 @@ namespace MultiBound {
 
         void setInteractive(bool);
 
-        void refresh(const QString& focusPath = QStringLiteral());
+        void refresh(const QString& focusPath = { });
         void launch(Instance* inst = nullptr);
 
         void updateFromWorkshop(Instance* inst = nullptr);
-        void newFromWorkshop(const QString& = QStringLiteral());
+        void newFromWorkshop(const QString& = { });
 
         Instance* selectedInstance();
         Instance* findWorkshopId(const QString&);
 
     private:
         Ui::MainWindow *ui;
+
+    signals:
+        void refreshSettings();
 
     };
 

@@ -32,6 +32,8 @@
 using MultiBound::MainWindow;
 using MultiBound::Instance;
 
+QPointer<MainWindow> MainWindow::instance;
+
 namespace { // clazy:excludeall=non-pod-global-static
     inline Instance* instanceFromItem(QListWidgetItem* itm) { return static_cast<Instance*>(itm->data(Qt::UserRole).value<void*>()); }
 
@@ -42,6 +44,9 @@ namespace { // clazy:excludeall=non-pod-global-static
             f = b;
             MultiBound::Config::save();
         });
+        QObject::connect(MultiBound::MainWindow::instance, &MultiBound::MainWindow::refreshSettings, a, [a, &f] {
+            a->setChecked(f);
+        });
     }
 }
 
@@ -49,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
     ui->setupUi(this);
+
+    instance = this;
 
     connect(ui->launchButton, &QPushButton::pressed, this, [this] { launch(); });
     connect(ui->instanceList, &QListWidget::doubleClicked, this, [this](const QModelIndex& ind) { if (ind.isValid()) launch(); });
@@ -132,7 +139,10 @@ MainWindow::MainWindow(QWidget *parent) :
     Util::updateStatus("");
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+    delete ui;
+    if (SettingsWindow::instance) SettingsWindow::instance->close();
+}
 
 void MainWindow::setInteractive(bool b) {
     ui->menuBar->setEnabled(b);
