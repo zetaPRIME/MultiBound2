@@ -178,11 +178,11 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     if (ws) { // if valid workshop, force proper root in case steamcmd defaults are incorrect
         QDir wsr(Config::workshopRoot);
         for (int i = 0; i < 4; i++) wsr.cdUp();
-        wss << qs("force_install_dir ") << wsr.absolutePath() << qs("\n");
+        wss << qs("force_install_dir \"") << wsr.absolutePath() << qs("\"\n");
     }
     wss << qs("login anonymous\n"); // log in after forcing install dir
 
-    dls << qs("force_install_dir ") << Config::steamcmdDLRoot << qs("\n");
+    dls << qs("force_install_dir \"") << Config::steamcmdDLRoot << qs("\"\n");
     dls << qs("login anonymous\n");
 
     auto eh = qs("workshop_download_item 211820 ");
