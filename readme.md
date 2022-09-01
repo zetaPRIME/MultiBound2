@@ -6,7 +6,7 @@ MultiBound 2 is built on C++17 and Qt 5.x instead of C# and the pile of crust th
 
 ~~Additionally, MultiBound 2 can automatically install/update Steam Workshop mods for you without having to launch Steam. (This happens automatically on installing or updating from a Workshop collection.)  
 Note: This functionality requires the decryption key for Workshop mods, automatically obtained from Steam configuration files. *If mod updates fail, make sure your Steam installation has at some point downloaded Workshop mods for Starbound.*~~
-## Valve broke anonymous workshop downloads further; MultiBound **will not** be able to reliably download or update Steam Workshop mods itself! Please subscribe to all relevant mods via Steam like with old versions.
+## Valve broke anonymous workshop downloads further; MultiBound *will not* be able to reliably download or update Steam Workshop mods itself! Please disable workshop updates in MultiBound and subscribe to all relevant mods via Steam like with old versions.
 
 ## Installing and running
 - **Windows:** Unzip anywhere writable and double-click `multibound.exe`.
