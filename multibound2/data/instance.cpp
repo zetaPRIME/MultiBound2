@@ -94,6 +94,9 @@ bool Instance::launch() {
         // and put together asset list
         QJsonArray assets;
         assets.append(evaluatePath("sb:/assets/"));
+        if (Config::useOpenSB) {
+            assets.append(Util::splicePath(Config::configPath, "/opensb/data/"));
+        }
 
         QSet<QString> workshop;
         QSet<QString> workshopExclude;
@@ -132,7 +135,9 @@ bool Instance::launch() {
     QDir wp(Config::starboundPath);
     wp.cdUp();
     sb.setWorkingDirectory(wp.absolutePath());
-    sb.start(Config::starboundPath, param);
+    auto exec = Config::starboundPath;
+    if (Config::useOpenSB) exec = Util::splicePath(Config::configPath, "/opensb/starbound");
+    sb.start(exec, param);
     sb.waitForFinished(-1);
     qDebug() << sb.errorString();
 

@@ -29,6 +29,8 @@ QString MultiBound::Config::workshopDecryptionKey;
 bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
+bool MultiBound::Config::useOpenSB = false;//true;
+
 namespace vdf = tyti::vdf;
 
 namespace {

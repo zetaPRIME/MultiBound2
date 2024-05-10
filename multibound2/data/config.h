@@ -19,6 +19,8 @@ namespace MultiBound {
         extern bool steamcmdEnabled;
         extern bool steamcmdUpdateSteamMods;
 
+        extern bool useOpenSB;
+
         //
         void load();
         void verify();

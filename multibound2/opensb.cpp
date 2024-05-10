@@ -127,6 +127,8 @@ void MultiBound::Util::updateOSB() {
     // if you're running a desktop without unzip, huh???
     ps.start("unzip", QStringList() << f.fileName() << "-d" << osbd.absolutePath());
     ev.exec();
+
+    ps.execute("chmod", QStringList() << "+x" << osbd.absoluteFilePath("starbound"));
 #endif
 
     osbd.remove(fn); // clean up the zip after we're done
