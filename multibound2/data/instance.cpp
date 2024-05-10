@@ -64,7 +64,7 @@ bool Instance::launch() {
     QString sbinitPath = Util::splicePath(Config::configPath, "_init.config");
 
     // and some logic for switching to OpenSB
-    bool useOSB = Config::useOpenSB;
+    bool useOSB = Config::openSBEnabled;
     auto osbRoot = (Config::openSBUseDev && QDir(Config::openSBDevRoot).exists("starbound")) ? Config::openSBDevRoot : Config::openSBRoot;
     if (!QDir(osbRoot).exists("starbound")) useOSB = false;
 

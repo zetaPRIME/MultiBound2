@@ -29,7 +29,7 @@ QString MultiBound::Config::workshopDecryptionKey;
 bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
-bool MultiBound::Config::useOpenSB = false;//true;
+bool MultiBound::Config::openSBEnabled = false;//true;
 bool MultiBound::Config::openSBUseDev = false;
 QString MultiBound::Config::openSBRoot;
 QString MultiBound::Config::openSBDevRoot;
