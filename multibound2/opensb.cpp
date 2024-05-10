@@ -175,25 +175,3 @@ void MultiBound::Util::openSBUpdate() {
 
     currentRelease = eligibleRelease;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
