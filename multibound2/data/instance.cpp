@@ -64,9 +64,14 @@ bool Instance::launch() {
     QString sbinitPath = Util::splicePath(Config::configPath, "_init.config");
 
     // and some logic for switching to OpenSB
+#if defined(Q_OS_WIN)
+    const auto osbBinary = qs("starbound.exe");
+#else
+    const auto osbBinary = qs("starbound");
+#endif
     bool useOSB = Config::openSBEnabled;
-    auto osbRoot = (Config::openSBUseDevBranch && QDir(Config::openSBDevRoot).exists("starbound")) ? Config::openSBDevRoot : Config::openSBRoot;
-    if (!QDir(osbRoot).exists("starbound")) useOSB = false;
+    auto osbRoot = (Config::openSBUseDevBranch && QDir(Config::openSBDevRoot).exists(osbBinary)) ? Config::openSBDevRoot : Config::openSBRoot;
+    if (!QDir(osbRoot).exists(osbBinary)) useOSB = false;
 
     {
         // construct sbinit
@@ -141,7 +146,7 @@ bool Instance::launch() {
     wp.cdUp();
     sb.setWorkingDirectory(wp.absolutePath());
     auto exec = Config::starboundPath;
-    if (useOSB) exec = Util::splicePath(osbRoot, "/starbound");
+    if (useOSB) exec = QDir(osbRoot).absoluteFilePath(osbBinary);
     sb.start(exec, param);
     sb.waitForFinished(-1);
     qDebug() << sb.errorString();
