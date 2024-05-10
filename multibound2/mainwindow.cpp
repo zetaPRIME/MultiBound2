@@ -148,6 +148,9 @@ MainWindow::MainWindow(QWidget *parent) :
     };
 
     Util::updateStatus("");
+
+    // add version to title
+    setWindowTitle(QString("%1 %2").arg(windowTitle(), Util::version));
 }
 
 MainWindow::~MainWindow() {
@@ -186,8 +189,10 @@ void MainWindow::setInteractive(bool b) {
 
 void MainWindow::checkUpdates(bool osbOnly) {
     if (!osbOnly) {
-        //QCoreApplication::applicationFilePath()
         // TODO figure out update check on windows
+        setInteractive(false);
+        Util::checkForUpdates();
+        setInteractive(true);
     }
 
     // OpenStarbound update check

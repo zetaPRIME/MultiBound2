@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <functional>
 
 #include <QString>
@@ -15,8 +14,9 @@ namespace tyti::vdf { template<typename T>class basic_object; }
 namespace MultiBound {
     class Instance;
     namespace Util {
+        const extern QString version;
 
-        inline QString splicePath(const QString& p1, const QString& p2) { return QDir::cleanPath(qs("%1/%2").arg(p1).arg(p2)); }
+        inline QString splicePath(const QString& p1, const QString& p2) { return QDir::cleanPath(qs("%1/%2").arg(p1, p2)); }
         inline QString splicePath(const QDir& d, const QString& p) { return splicePath(d.absolutePath(), p); }
 
         QJsonDocument loadJson(const QString& path);
@@ -35,6 +35,9 @@ namespace MultiBound {
         void updateMods(Instance*);
 
         extern std::function<void(QString)> updateStatus;
+
+        // update checking for MultiBound itself
+        void checkForUpdates();
 
         // OpenStarbound integration
         void openSBCheckForUpdates();
