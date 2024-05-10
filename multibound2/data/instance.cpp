@@ -65,7 +65,7 @@ bool Instance::launch() {
 
     // and some logic for switching to OpenSB
     bool useOSB = Config::openSBEnabled;
-    auto osbRoot = (Config::openSBUseDev && QDir(Config::openSBDevRoot).exists("starbound")) ? Config::openSBDevRoot : Config::openSBRoot;
+    auto osbRoot = (Config::openSBUseDevBranch && QDir(Config::openSBDevRoot).exists("starbound")) ? Config::openSBDevRoot : Config::openSBRoot;
     if (!QDir(osbRoot).exists("starbound")) useOSB = false;
 
     {

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>MultiBound Settings</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1000,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1000,0">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -30,7 +30,50 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="groupOpenSB">
+     <property name="title">
+      <string>OpenStarbound integration</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="openSBEnabled">
+        <property name="text">
+         <string>Use OpenStarbound</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="openSBUseDevBranch">
+        <property name="toolTip">
+         <string>Launches from an installation manually placed/symlinked into &quot;opensb-dev&quot;
+instead of the installation managed by MultiBound.
+(File structure should be the same.)</string>
+        </property>
+        <property name="text">
+         <string>Use development copy (manual)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupSteamcmd">
      <property name="enabled">
       <bool>false</bool>
      </property>

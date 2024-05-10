@@ -21,6 +21,9 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     connect(this, &QDialog::accepted, this, &SettingsWindow::apply);
 
     // set up initial values
+    ui->openSBEnabled->setChecked(Config::openSBEnabled);
+    ui->openSBUseDevBranch->setChecked(Config::openSBUseDevBranch);
+
     ui->steamcmdEnabled->setChecked(Config::steamcmdEnabled);
     ui->steamcmdUpdateSteamMods->setChecked(Config::steamcmdUpdateSteamMods);
 
@@ -38,6 +41,9 @@ SettingsWindow::~SettingsWindow() {
 }
 
 void SettingsWindow::apply() {
+    Config::openSBEnabled = ui->openSBEnabled->isChecked();
+    Config::openSBUseDevBranch = ui->openSBUseDevBranch->isChecked();
+
     Config::steamcmdEnabled = ui->steamcmdEnabled->isChecked();
     Config::steamcmdUpdateSteamMods = ui->steamcmdUpdateSteamMods->isChecked();
 

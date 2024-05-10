@@ -29,8 +29,8 @@ QString MultiBound::Config::workshopDecryptionKey;
 bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
-bool MultiBound::Config::openSBEnabled = false;//true;
-bool MultiBound::Config::openSBUseDev = false;
+bool MultiBound::Config::openSBEnabled = true;
+bool MultiBound::Config::openSBUseDevBranch = false;
 QString MultiBound::Config::openSBRoot;
 QString MultiBound::Config::openSBDevRoot;
 
@@ -87,6 +87,9 @@ void MultiBound::Config::load() {
         workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey).toLower().trimmed();
 
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
+
+        openSBEnabled = cfg["openSBEnabled"].toBool(openSBEnabled);
+        openSBUseDevBranch = cfg["openSBUseDevBranch"].toBool(openSBUseDevBranch);
     }
 
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
@@ -143,6 +146,9 @@ void MultiBound::Config::save() {
     cfg["workshopDecryptionKey"] = workshopDecryptionKey;
 
     cfg["steamcmdUpdateSteamMods"] = steamcmdUpdateSteamMods;
+
+    cfg["openSBEnabled"] = openSBEnabled;
+    cfg["openSBUseDevBranch"] = openSBUseDevBranch;
 
     QFile f(Util::splicePath(configPath, "/config.json"));
     f.open(QFile::WriteOnly);

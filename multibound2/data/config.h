@@ -20,7 +20,7 @@ namespace MultiBound {
         extern bool steamcmdUpdateSteamMods;
 
         extern bool openSBEnabled;
-        extern bool openSBUseDev;
+        extern bool openSBUseDevBranch;
         extern QString openSBRoot;
         extern QString openSBDevRoot;
 
