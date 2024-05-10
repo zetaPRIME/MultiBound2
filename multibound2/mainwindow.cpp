@@ -49,6 +49,8 @@ namespace { // clazy:excludeall=non-pod-global-static
             a->setChecked(f);
         });
     }
+
+    bool firstShow = true;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -156,18 +158,22 @@ MainWindow::~MainWindow() {
 void MainWindow::showEvent(QShowEvent* e) {
     QMainWindow::showEvent(e);
 
-    // execute the rest after showing
-    QTimer::singleShot(0, this, [this] {
-        if (!Config::openSBOffered) {
-            auto res = QMessageBox::question(this, "OpenStarbound integration", "Would you like to enable OpenStarbound support? OpenStarbound contains various performance and quality-of-life improvements over the vanilla client, and enables mod features which are simply not possible otherwise.\n\n(MultiBound will handle installing and updating its own copy of OpenStarbound.)", QMessageBox::Yes, QMessageBox::No);
-            Config::openSBEnabled = res == QMessageBox::Yes;
-            Config::openSBOffered = true;
-            Config::save();
-        }
+    if (firstShow) { // only check for updates and such on launch, not on return from game
+        firstShow = false;
 
-        // then check updates
-        checkUpdates();
-    });
+        // execute the rest after showing
+        QTimer::singleShot(0, this, [this] {
+            if (!Config::openSBOffered) {
+                auto res = QMessageBox::question(this, "OpenStarbound integration", "Would you like to enable OpenStarbound support? OpenStarbound contains various performance and quality-of-life improvements over the vanilla client, and enables mod features which are simply not possible otherwise.\n\n(MultiBound will handle installing and updating its own copy of OpenStarbound.)", QMessageBox::Yes, QMessageBox::No);
+                Config::openSBEnabled = res == QMessageBox::Yes;
+                Config::openSBOffered = true;
+                Config::save();
+            }
+
+            // then check updates
+            checkUpdates();
+        });
+    }
 }
 
 void MainWindow::setInteractive(bool b) {
