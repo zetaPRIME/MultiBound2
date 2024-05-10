@@ -128,9 +128,12 @@ void MultiBound::Util::updateOSB() {
     ps.start("unzip", QStringList() << f.fileName() << "-d" << osbd.absolutePath());
     ev.exec();
 
-    //ps.execute("chmod", QStringList() << "+x" << osbd.absoluteFilePath("starbound"));
-    QFile ex(osbd.absoluteFilePath("starbound"));
-    ex.setPermissions(ex.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
+    foreach (auto fn, osbd.entryList(QDir::Files)) {
+        if (!fn.contains(".")) { // no extension, assume it's a binary and fix permissions as such
+            QFile ex(osbd.absoluteFilePath(fn));
+            ex.setPermissions(ex.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
+        }
+    }
 #endif
 
     osbd.remove(fn); // clean up the zip after we're done
