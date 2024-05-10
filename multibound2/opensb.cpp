@@ -15,6 +15,7 @@
 #include <QHttpMultiPart>
 #include <QEventLoop>
 
+#include <QMessageBox>
 #include <QProcess>
 
 
@@ -77,7 +78,36 @@ QJsonObject& findEligibleRelease(bool forceRefresh = false) {
     return eligibleRelease;
 }
 
-void MultiBound::Util::updateOSB() {
+void MultiBound::Util::openSBCheckForUpdates() {
+    if (currentRelease.isEmpty()) {
+        if (QFile f(Util::splicePath(Config::openSBRoot, "/release.json")); f.exists()) {
+            f.open(QFile::ReadOnly);
+            currentRelease = QJsonDocument::fromJson(f.readAll()).object();
+        }
+    }
+    // if still empty, assume none and... prompt?
+    if (currentRelease.isEmpty()) {
+        // TODO
+    }
+
+    findEligibleRelease(true);
+    if (eligibleRelease.isEmpty()) return; // nothing to show
+    auto ed = QDateTime::fromString(eligibleRelease["published_at"].toString(), Qt::ISODate);
+    auto cd = QDateTime::fromString(currentRelease["published_at"].toString(), Qt::ISODate);
+    if (ed > cd) { // eligible is newer (or more extant) than current, prompt to update
+        auto ver = eligibleRelease["name"].toString();
+        if (ver.isEmpty()) ver = eligibleRelease["tag_name"].toString();
+        if (ver.isEmpty()) ver = "unknown";
+
+        auto res = QMessageBox::information(nullptr, "OpenStarbound update", QString("A new version of OpenStarbound (%1) is available. Would you like to install it?").arg(ver), QMessageBox::Yes, QMessageBox::No);
+        if (res == QMessageBox::Yes) {
+            openSBUpdate();
+        }
+        //
+    }
+}
+
+void MultiBound::Util::openSBUpdate() {
     findEligibleRelease();
     if (eligibleRelease.isEmpty()) return; // nothing
 

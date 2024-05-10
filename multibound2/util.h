@@ -36,6 +36,8 @@ namespace MultiBound {
 
         extern std::function<void(QString)> updateStatus;
 
-        void updateOSB();
+        // OpenStarbound integration
+        void openSBCheckForUpdates();
+        void openSBUpdate();
     }
 }

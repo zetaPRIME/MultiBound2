@@ -21,6 +21,8 @@ namespace MultiBound {
         explicit MainWindow(QWidget* parent = nullptr);
         ~MainWindow();
 
+        void showEvent(QShowEvent*) override;
+
         void setInteractive(bool);
 
         void refresh(const QString& focusPath = { });

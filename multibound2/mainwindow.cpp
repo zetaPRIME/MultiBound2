@@ -13,6 +13,7 @@
 #include <memory>
 
 #include <QDebug>
+#include <QTimer>
 
 #include <QDir>
 #include <QFile>
@@ -72,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     auto testAction = ui->menuBar->addAction("download osb");
     connect(testAction, &QAction::triggered, this, [this] {
         setInteractive(false);
-        Util::updateOSB();
+        Util::openSBUpdate();
         setInteractive(true);
     });
 
@@ -150,6 +151,20 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow() {
     delete ui;
     if (SettingsWindow::instance) SettingsWindow::instance->close();
+}
+
+void MainWindow::showEvent(QShowEvent* e) {
+    QMainWindow::showEvent(e);
+
+    // execute the rest after showing
+    QTimer::singleShot(0, this, [this] {
+        if (Config::openSBEnabled) {
+            setInteractive(false);
+            Util::openSBCheckForUpdates();
+            setInteractive(true);
+        }
+
+    });
 }
 
 void MainWindow::setInteractive(bool b) {
