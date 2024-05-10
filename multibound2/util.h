@@ -35,5 +35,7 @@ namespace MultiBound {
         void updateMods(Instance*);
 
         extern std::function<void(QString)> updateStatus;
+
+        void updateOSB();
     }
 }
