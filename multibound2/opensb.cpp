@@ -81,15 +81,11 @@ void MultiBound::Util::updateOSB() {
     if (eligibleRelease.isEmpty()) return; // nothing
 
     // set up directory structure
-    QDir osbd(Config::configPath);
-    if (osbd.cd("opensb")) {
-        // nuke old installation files if they exist
+    QDir osbd(Config::openSBRoot);
+    if (osbd.exists()) { // nuke old installation files if they exist
         osbd.removeRecursively();
-        osbd.cdUp();
     }
-    osbd.mkpath("opensb");
-    osbd.cd("opensb");
-
+    osbd.mkpath("."); // make the directory exist (again)
 
     // download time!
     QNetworkAccessManager net;

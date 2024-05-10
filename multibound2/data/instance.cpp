@@ -63,6 +63,10 @@ bool Instance::launch() {
     // determine path ahead of time
     QString sbinitPath = Util::splicePath(Config::configPath, "_init.config");
 
+    // and some logic for switching to OpenSB
+    bool useOSB = Config::useOpenSB;
+    auto osbRoot = Config::openSBUseDev ? Config::openSBDevRoot : Config::openSBRoot;
+
     {
         // construct sbinit
         QJsonObject sbinit;
@@ -94,8 +98,8 @@ bool Instance::launch() {
         // and put together asset list
         QJsonArray assets;
         assets.append(evaluatePath("sb:/assets/"));
-        if (Config::useOpenSB) {
-            assets.append(Util::splicePath(Config::configPath, "/opensb/data/"));
+        if (useOSB) {
+            assets.append(Util::splicePath(osbRoot, "/data/"));
         }
 
         QSet<QString> workshop;
@@ -136,7 +140,7 @@ bool Instance::launch() {
     wp.cdUp();
     sb.setWorkingDirectory(wp.absolutePath());
     auto exec = Config::starboundPath;
-    if (Config::useOpenSB) exec = Util::splicePath(Config::configPath, "/opensb/starbound");
+    if (useOSB) exec = Util::splicePath(osbRoot, "/starbound");
     sb.start(exec, param);
     sb.waitForFinished(-1);
     qDebug() << sb.errorString();

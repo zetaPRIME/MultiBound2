@@ -30,6 +30,9 @@ bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
 bool MultiBound::Config::useOpenSB = false;//true;
+bool MultiBound::Config::openSBUseDev = false;
+QString MultiBound::Config::openSBRoot;
+QString MultiBound::Config::openSBDevRoot;
 
 namespace vdf = tyti::vdf;
 
@@ -66,6 +69,9 @@ void MultiBound::Config::load() {
 #endif
     if (auto d = QDir(configPath); !d.exists()) d.mkpath(".");
     instanceRoot = Util::splicePath(configPath, "/instances/");
+
+    openSBRoot = Util::splicePath(configPath, "/opensb/");
+    openSBDevRoot = Util::splicePath(configPath, "/opensb-dev/");
 
     steamcmdDLRoot = configPath;
 
