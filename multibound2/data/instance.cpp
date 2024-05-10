@@ -146,7 +146,11 @@ bool Instance::launch() {
     wp.cdUp();
     sb.setWorkingDirectory(wp.absolutePath());
     auto exec = Config::starboundPath;
-    if (useOSB) exec = QDir(osbRoot).absoluteFilePath(osbBinary);
+    if (useOSB) {
+        QDir d(osbRoot);
+        sb.setWorkingDirectory(d.absolutePath());
+        exec = d.absoluteFilePath(osbBinary);
+    }
     sb.start(exec, param);
     sb.waitForFinished(-1);
     qDebug() << sb.errorString();
