@@ -26,6 +26,7 @@ namespace { // clazy:excludeall=non-pod-global-static
     QJsonDocument releaseInfo;
     QJsonObject eligibleRelease;
     QString eligibleReleaseUrl;
+    QJsonObject currentRelease;
 
     // os-specific things
 #if defined(Q_OS_WIN)
@@ -133,9 +134,16 @@ void MultiBound::Util::updateOSB() {
 #endif
 
     osbd.remove(fn); // clean up the zip after we're done
-
-    // end
     updateStatus("");
+
+    // finally, write out the release info
+    QFile rf(osbd.absoluteFilePath("release.json"));
+    rf.open(QFile::WriteOnly);
+    rf.write(QJsonDocument(eligibleRelease).toJson(QJsonDocument::Indented));
+    rf.flush();
+    rf.close();
+
+    currentRelease = eligibleRelease;
 }
 
 
