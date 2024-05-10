@@ -18,19 +18,40 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 
+#include <QVersionNumber>
+
 const QString MultiBound::Util::version = qs("v0.5.5");
 
 namespace { // clazy:excludeall=non-pod-global-static
     const auto releasesUrl = qs("https://api.github.com/repos/zetaPRIME/MultiBound2/releases");
 }
 
+QVersionNumber getVer(QString a) {
+    if (a.at(0) == 'v') a = a.mid(1);
+    int suf = -1;
+    auto v = QVersionNumber::fromString(a, &suf);
+
+    if (suf > 0 && suf < a.length()) {
+        auto c = a.at(suf).toLower();
+        if (c.isLetter()) {
+            auto vr = v.segments();
+            vr.append(c.toLatin1() - ('a'-1));
+            v = QVersionNumber(vr);
+        }
+    }
+
+    return v;
+}
+
+// a > b
+bool compareVersions(const QString& a, const QString& b = MultiBound::Util::version) {
+    return getVer(a) > getVer(b);
+}
+
 // somewhat naive github version checking for Windows only
 void MultiBound::Util::checkForUpdates() {
 #if defined(Q_OS_WIN)
     updateStatus("Checking for updates...");
-
-    // grab install time for later
-    auto binDate = QFileInfo(QCoreApplication::applicationFilePath()).birthTime();
 
     // fetch release info
     QNetworkAccessManager net;
@@ -63,9 +84,8 @@ void MultiBound::Util::checkForUpdates() {
 
     if (!rel.isEmpty()) { // we found a release, check if it's eligible
         auto ver = rel["tag_name"].toString();
-        auto date = QDateTime::fromString(rel["published_at"].toString(), Qt::ISODate);
 
-        if (date > binDate && ver != Util::version) { // prompt
+        if (compareVersions(ver)) { // prompt
             auto res = QMessageBox::information(nullptr, "Update Check", QString("A new version of MultiBound (%1) is available. Would you like to download it?").arg(ver), QMessageBox::Yes, QMessageBox::No);
             if (res == QMessageBox::Yes) {
                 QDesktopServices::openUrl(rel["html_url"].toString());
