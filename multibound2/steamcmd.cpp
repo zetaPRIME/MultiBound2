@@ -43,6 +43,8 @@ namespace { // clazy:excludeall=non-pod-global-static
 }
 
 bool MultiBound::Util::initSteamCmd() {
+    return false; // we're not supporting this until something is figured out
+
     if (!Config::steamcmdEnabled) return false; // don't bother if it's disabled
     if (scp) {
         if (scFail) return false; // could not init steamcmd

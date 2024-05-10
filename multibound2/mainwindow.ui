@@ -33,10 +33,10 @@
     <item>
      <widget class="QListWidget" name="instanceList">
       <property name="contextMenuPolicy">
-       <enum>Qt::CustomContextMenu</enum>
+       <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
@@ -129,6 +129,9 @@
   <action name="actionUpdateSteamMods">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>&amp;Update mods installed by Steam</string>
