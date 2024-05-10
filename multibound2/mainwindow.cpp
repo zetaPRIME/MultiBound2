@@ -71,14 +71,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit, &QAction::triggered, this, [this] { close(); });
     connect(ui->actionFromCollection, &QAction::triggered, this, [this] { newFromWorkshop(); });
 
-    // TEMP STUFF
-    auto testAction = ui->menuBar->addAction("download osb");
-    connect(testAction, &QAction::triggered, this, [this] {
-        setInteractive(false);
-        Util::openSBUpdate();
-        setInteractive(true);
-    });
-
     // settings
     bindConfig(ui->actionUpdateSteamMods, Config::steamcmdUpdateSteamMods);
     connect(ui->actionSettings, &QAction::triggered, this, [ ] {
