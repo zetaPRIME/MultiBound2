@@ -31,6 +31,7 @@ bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
 bool MultiBound::Config::openSBEnabled = true;
 bool MultiBound::Config::openSBUseDevBranch = false;
+bool MultiBound::Config::openSBOffered = false;
 QString MultiBound::Config::openSBRoot;
 QString MultiBound::Config::openSBDevRoot;
 
@@ -90,6 +91,7 @@ void MultiBound::Config::load() {
 
         openSBEnabled = cfg["openSBEnabled"].toBool(openSBEnabled);
         openSBUseDevBranch = cfg["openSBUseDevBranch"].toBool(openSBUseDevBranch);
+        openSBOffered = cfg["openSBOffered"].toBool(openSBOffered);
     }
 
     if (auto d = QDir(instanceRoot); !d.exists()) d.mkpath(".");
@@ -149,6 +151,7 @@ void MultiBound::Config::save() {
 
     cfg["openSBEnabled"] = openSBEnabled;
     cfg["openSBUseDevBranch"] = openSBUseDevBranch;
+    cfg["openSBOffered"] = openSBOffered;
 
     QFile f(Util::splicePath(configPath, "/config.json"));
     f.open(QFile::WriteOnly);

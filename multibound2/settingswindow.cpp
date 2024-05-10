@@ -5,6 +5,8 @@
 
 #include "data/config.h"
 
+#include <QTimer>
+
 using MultiBound::SettingsWindow;
 
 QPointer<SettingsWindow> SettingsWindow::instance;
@@ -41,6 +43,8 @@ SettingsWindow::~SettingsWindow() {
 }
 
 void SettingsWindow::apply() {
+    bool enablingOSB = ui->openSBEnabled->isChecked() && !Config::openSBEnabled;
+
     Config::openSBEnabled = ui->openSBEnabled->isChecked();
     Config::openSBUseDevBranch = ui->openSBUseDevBranch->isChecked();
 
@@ -51,4 +55,8 @@ void SettingsWindow::apply() {
 
     Config::save();
     emit MainWindow::instance->refreshSettings();
+
+    if (enablingOSB) QTimer::singleShot(0, MainWindow::instance, [] {
+        MainWindow::instance->checkUpdates(true);
+    });
 }

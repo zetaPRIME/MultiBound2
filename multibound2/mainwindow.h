@@ -25,6 +25,8 @@ namespace MultiBound {
 
         void setInteractive(bool);
 
+        void checkUpdates(bool osbOnly = false);
+
         void refresh(const QString& focusPath = { });
         void launch(Instance* inst = nullptr);
 
