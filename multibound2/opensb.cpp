@@ -45,19 +45,24 @@ namespace { // clazy:excludeall=non-pod-global-static
     const auto ciPlatform = qs("Ubuntu Linux");
     const auto ciArtifact = qs("OpenStarbound-Linux-Client");
 #endif
+
+    // some utility stuff
+    QEventLoop ev;
+    void await(QNetworkReply* reply) {
+        QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
+        ev.exec(); // wait for things
+        reply->deleteLater();
+    }
 }
 
 QJsonDocument& getReleaseInfo(bool forceRefresh = false) {
     if (!forceRefresh && !releaseInfo.isEmpty()) return releaseInfo;
 
     QNetworkAccessManager net;
-    QEventLoop ev;
 
     QNetworkRequest req(releasesUrl);
     auto reply = net.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
-    ev.exec(); // wait for things
-    reply->deleteLater();
+    await(reply);
 
     releaseInfo = QJsonDocument::fromJson(reply->readAll());
     return releaseInfo;
@@ -142,9 +147,7 @@ void MultiBound::Util::openSBUpdate() {
         updateStatus(QString("Downloading... %1\%").arg(std::floor((double)c/(double)t*100 + 0.5)));
     });
     QObject::connect(reply, &QNetworkReply::readyRead, &f, [&f, reply] {f.write(reply->readAll());});
-    QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
-    ev.exec(); // wait for things
-    reply->deleteLater();
+    await(reply);
 
     f.flush();
     f.close();
@@ -186,13 +189,10 @@ void MultiBound::Util::openSBUpdate() {
 
 void MultiBound::Util::openSBUpdateCI() {
     QNetworkAccessManager net;
-    QEventLoop ev;
 
     QNetworkRequest req(releasesUrl);
     auto reply = net.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
-    ev.exec(); // wait for things
-    reply->deleteLater();
+    await(reply);
 
     auto runs = QJsonDocument::fromJson(reply->readAll()).object()["workflow_runs"].toArray();
 
