@@ -42,5 +42,6 @@ namespace MultiBound {
         // OpenStarbound integration
         void openSBCheckForUpdates();
         void openSBUpdate();
+        void openSBUpdateCI();
     }
 }

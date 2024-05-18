@@ -29,13 +29,21 @@ namespace { // clazy:excludeall=non-pod-global-static
     QString eligibleReleaseUrl;
     QJsonObject currentRelease;
 
+    const auto ciUrl = qs("https://api.github.com/repos/OpenStarbound/OpenStarbound/actions/runs");
+
     // os-specific things
 #if defined(Q_OS_WIN)
     const auto pkgAssetName = qs("win_opensb.zip");
+    const auto ciPlatform = qs("Windows");
+    const auto ciArtifact = qs("OpenStarbound-Windows-Client");
 #elif defined (Q_OS_MACOS)
     const auto pkgAssetName = qs("osx_opensb.zip except not because we don't have code for this"); // it just won't find an eligible release
+    const auto ciPlatform = qs("macOS");
+    const auto ciArtifact = qs("and now we have a problem");
 #else // linux
     const auto pkgAssetName = qs("linux_opensb.zip");
+    const auto ciPlatform = qs("Ubuntu Linux");
+    const auto ciArtifact = qs("OpenStarbound-Linux-Client");
 #endif
 }
 
@@ -174,4 +182,47 @@ void MultiBound::Util::openSBUpdate() {
     rf.close();
 
     currentRelease = eligibleRelease;
+}
+
+void MultiBound::Util::openSBUpdateCI() {
+    QNetworkAccessManager net;
+    QEventLoop ev;
+
+    QNetworkRequest req(releasesUrl);
+    auto reply = net.get(req);
+    QObject::connect(reply, &QNetworkReply::finished, &ev, &QEventLoop::quit);
+    ev.exec(); // wait for things
+    reply->deleteLater();
+
+    auto runs = QJsonDocument::fromJson(reply->readAll()).object()["workflow_runs"].toArray();
+
+    QJsonObject ri;
+    foreach (const auto& rv, runs) {
+        auto r = rv.toObject();
+
+        if (r["name"] == ciPlatform && r["head_branch"] == "main") {
+            ri = r;
+            break;
+        }
+    }
+
+    if (ri.isEmpty()) {
+        QMessageBox::critical(nullptr, "", "No matching artifacts found.");
+        return;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //
 }
