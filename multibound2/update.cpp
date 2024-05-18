@@ -50,7 +50,6 @@ bool compareVersions(const QString& a, const QString& b = MultiBound::Util::vers
 
 // somewhat naive github version checking for Windows only
 void MultiBound::Util::checkForUpdates() {
-#if defined(Q_OS_WIN)
     updateStatus("Checking for updates...");
 
     // fetch release info
@@ -86,7 +85,7 @@ void MultiBound::Util::checkForUpdates() {
         auto ver = rel["tag_name"].toString();
 
         if (compareVersions(ver)) { // prompt
-            auto res = QMessageBox::information(nullptr, "Update Check", QString("A new version of MultiBound (%1) is available. Would you like to download it?").arg(ver), QMessageBox::Yes, QMessageBox::No);
+            auto res = QMessageBox::information(nullptr, "Update Check", QString("A new version of MultiBound (%1) is available. Would you like to visit the release page?").arg(ver), QMessageBox::Yes, QMessageBox::No);
             if (res == QMessageBox::Yes) {
                 QDesktopServices::openUrl(rel["html_url"].toString());
             }
@@ -94,5 +93,4 @@ void MultiBound::Util::checkForUpdates() {
     }
 
     updateStatus("");
-#endif
 }
