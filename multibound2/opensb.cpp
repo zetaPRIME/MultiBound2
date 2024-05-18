@@ -138,8 +138,6 @@ void MultiBound::Util::openSBUpdate() {
     QFile f(osbd.absoluteFilePath(fn));
     f.open(QFile::WriteOnly);
 
-    updateStatus("Downloading...");
-
     QNetworkRequest req(eligibleReleaseUrl);
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy); // allow redirects
     auto reply = net.get(req);
@@ -190,8 +188,7 @@ void MultiBound::Util::openSBUpdate() {
 void MultiBound::Util::openSBUpdateCI() {
     QNetworkAccessManager net;
 
-    QNetworkRequest req(releasesUrl);
-    auto reply = net.get(req);
+    auto reply = net.get(QNetworkRequest(releasesUrl));
     await(reply);
 
     auto runs = QJsonDocument::fromJson(reply->readAll()).object()["workflow_runs"].toArray();
@@ -210,6 +207,64 @@ void MultiBound::Util::openSBUpdateCI() {
         QMessageBox::critical(nullptr, "", "No matching artifacts found.");
         return;
     }
+
+    reply = net.get(QNetworkRequest(ri["artifacts_url"].toString()));
+    await(reply);
+
+    auto afx = QJsonDocument::fromJson(reply->readAll()).object()["artifacts"].toArray();
+
+    QJsonObject ai;
+    foreach (const auto& av, afx) {
+        auto a = av.toObject();
+        if (a["name"] == ciArtifact) {
+            ai = a;
+            return;
+        }
+    }
+
+    if (ri.isEmpty()) {
+        QMessageBox::critical(nullptr, "", "No matching artifacts found.");
+        return;
+    } else if (QMessageBox::question(nullptr, "", QString("Build #%1 (%2): %3").arg(QString(ai["run_number"].toInt()), ai["head_sha"].toString().left(7), ai["display_title"].toString()), "Install", "Cancel") != 0) return;
+
+    QDir cid(Config::openSBCIRoot);
+    if (cid.exists()) { // nuke old installation files if they exist
+        cid.removeRecursively();
+    }
+    cid.mkpath("."); // make the directory exist (again)
+
+    const auto fn = qs("_download.zip");
+    QFile f(cid.absoluteFilePath(fn));
+    f.open(QFile::WriteOnly);
+
+    QNetworkRequest req(ai["archive_download_url"].toString()); // prepare for actual download
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy); // allow redirects
+    reply = net.get(req);
+    QObject::connect(reply, &QNetworkReply::downloadProgress, &ev, [](auto c, auto t) {
+        updateStatus(QString("Downloading... %1\%").arg(std::floor((double)c/(double)t*100 + 0.5)));
+    });
+    QObject::connect(reply, &QNetworkReply::readyRead, &f, [&f, reply] {f.write(reply->readAll());});
+    await(reply);
+
+    f.flush();
+    f.close();
+
+    // now we unzip this fucker
+    updateStatus("Extracting package...");
+    QProcess ps;
+    QObject::connect(&ps, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &ev, &QEventLoop::quit);
+
+    // windows: unzip > assets, win
+    // linux: unzip, client.tar, client_distribution/[assets, linux]
+    // why.
+
+#if defined(Q_OS_WIN) // oh boy, platform implementation time
+    // extract using powershell, move everything in /win/ to /, remove /win/
+    // super easy
+#else // unix, probably linux
+    // extract with unzip, untar, move assets out, move everything in linux to root, then nuke client_distribution
+    // kind of annoying
+#endif
 
 
 

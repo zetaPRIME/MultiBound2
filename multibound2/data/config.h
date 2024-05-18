@@ -23,6 +23,7 @@ namespace MultiBound {
         extern bool openSBUseDevBranch;
         extern bool openSBOffered;
         extern QString openSBRoot;
+        extern QString openSBCIRoot;
         extern QString openSBDevRoot;
 
         //
