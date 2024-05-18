@@ -85,7 +85,7 @@ void MultiBound::Util::checkForUpdates() {
         auto ver = rel["tag_name"].toString();
 
         if (compareVersions(ver)) { // prompt
-            auto res = QMessageBox::information(nullptr, "Update Check", QString("A new version of MultiBound (%1) is available. Would you like to visit the release page?").arg(ver), QMessageBox::Yes, QMessageBox::No);
+            auto res = QMessageBox::information(nullptr, "Update Notice", QString("A new version of MultiBound (%1) is available. Would you like to visit the release page?").arg(ver), QMessageBox::Yes, QMessageBox::No);
             if (res == QMessageBox::Yes) {
                 QDesktopServices::openUrl(rel["html_url"].toString());
             }
