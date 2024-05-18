@@ -188,7 +188,7 @@ void MultiBound::Util::openSBUpdate() {
 void MultiBound::Util::openSBUpdateCI() {
     QNetworkAccessManager net;
 
-    auto reply = net.get(QNetworkRequest(releasesUrl));
+    auto reply = net.get(QNetworkRequest(ciUrl));
     await(reply);
 
     auto runs = QJsonDocument::fromJson(reply->readAll()).object()["workflow_runs"].toArray();
@@ -196,6 +196,8 @@ void MultiBound::Util::openSBUpdateCI() {
     QJsonObject ri;
     foreach (const auto& rv, runs) {
         auto r = rv.toObject();
+
+        qDebug() << "run entry" << r["name"].toString();
 
         if (r["name"] == ciPlatform && r["head_branch"] == "main") {
             ri = r;
@@ -208,24 +210,32 @@ void MultiBound::Util::openSBUpdateCI() {
         return;
     }
 
+    qDebug() << "fetching artifacts";
     reply = net.get(QNetworkRequest(ri["artifacts_url"].toString()));
     await(reply);
+    qDebug() << "fetch complete";
 
     auto afx = QJsonDocument::fromJson(reply->readAll()).object()["artifacts"].toArray();
 
     QJsonObject ai;
     foreach (const auto& av, afx) {
         auto a = av.toObject();
+        qDebug() << "artifact entry" << a["name"].toString();
         if (a["name"] == ciArtifact) {
             ai = a;
-            return;
+            break;
         }
     }
 
-    if (ri.isEmpty()) {
+    if (ai.isEmpty()) {
         QMessageBox::critical(nullptr, "", "No matching artifacts found.");
         return;
-    } else if (QMessageBox::question(nullptr, "", QString("Build #%1 (%2): %3").arg(QString(ai["run_number"].toInt()), ai["head_sha"].toString().left(7), ai["display_title"].toString()), "Install", "Cancel") != 0) return;
+    } else {
+        auto res = QMessageBox::question(nullptr, "", QString("Build #%1 (%2): %3").arg(QString("%1").arg(ri["run_number"].toInt()), ri["head_sha"].toString().left(7), ri["display_title"].toString()), "Install", "Cancel");
+        qDebug() << "prompt returned" << res;
+        if (res != 0) return;
+    }
+    qDebug() << "after prompt";
 
     QDir cid(Config::openSBCIRoot);
     if (cid.exists()) { // nuke old installation files if they exist
@@ -258,13 +268,45 @@ void MultiBound::Util::openSBUpdateCI() {
     // linux: unzip, client.tar, client_distribution/[assets, linux]
     // why.
 
+    QDir wd(cid.absolutePath()); // working dir
 #if defined(Q_OS_WIN) // oh boy, platform implementation time
     // extract using powershell, move everything in /win/ to /, remove /win/
+    ps.start("powershell", QStringList() << "Expand-Archive" << "-DestinationPath" << cid.absolutePath() << "-LiteralPath" << f.fileName());
+    ev.exec();
+    wd.cd("win")
+    foreach (auto fn, wd.entryList(QDir::Files)) {
+        wd.rename(fn, cid.filePath(fn));
+    }
+    wd.cdUp();
+    wd.rmdir("win");
     // super easy
 #else // unix, probably linux
     // extract with unzip, untar, move assets out, move everything in linux to root, then nuke client_distribution
     // kind of annoying
+    ps.start("unzip", QStringList() << f.fileName() << "-d" << cid.absolutePath());
+    ev.exec();
+    ps.start("tar", QStringList() << "-xf" << cid.absoluteFilePath("client.tar") << "-C" << cid.absolutePath());
+    ev.exec();
+
+    return; // don't do the risky part until we figure out the download
+    wd.cd("client_distribution");
+    wd.rename("assets", cid.absoluteFilePath("assets"));
+    wd.cd("linux");
+    foreach (auto fn, wd.entryList(QDir::Files)) {
+        if (!fn.contains(".")) { // no extension, assume it's a binary and fix permissions as such
+            QFile ex(wd.absoluteFilePath(fn));
+            ex.setPermissions(ex.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
+        }
+        wd.rename(fn, cid.absoluteFilePath(fn));
+    }
+    // nuke
+    wd.cdUp();
+    //wd.removeRecursively();
+    cid.remove("client.tar"); // clean up internal subarchive
 #endif
+    f.remove(); // clean up downloaded archive
+
+    updateStatus("");
 
 
 

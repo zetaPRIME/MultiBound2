@@ -143,6 +143,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // add version to title
     setWindowTitle(QString("%1 %2").arg(windowTitle(), Util::version));
+
+    // TEMP
+    connect(ui->menuBar->addAction("Fetch CI build"), &QAction::triggered, this, [this] {
+        setInteractive(false);
+        Util::openSBUpdateCI();
+        setInteractive(true);
+    });
 }
 
 MainWindow::~MainWindow() {
