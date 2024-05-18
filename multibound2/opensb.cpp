@@ -273,6 +273,7 @@ void MultiBound::Util::openSBUpdateCI() {
     // extract using powershell, move everything in /win/ to /, remove /win/
     ps.start("powershell", QStringList() << "Expand-Archive" << "-DestinationPath" << cid.absolutePath() << "-LiteralPath" << f.fileName());
     ev.exec();
+    updateStatus("");
     wd.cd("win")
     foreach (auto fn, wd.entryList(QDir::Files)) {
         wd.rename(fn, cid.filePath(fn));
@@ -288,8 +289,9 @@ void MultiBound::Util::openSBUpdateCI() {
     ps.start("tar", QStringList() << "-xf" << cid.absoluteFilePath("client.tar") << "-C" << cid.absolutePath());
     ev.exec();
 
+    updateStatus("");
     return; // don't do the risky part until we figure out the download
-    wd.cd("client_distribution");
+    if (!wd.cd("client_distribution")) return; // download failed for some reason or another
     wd.rename("assets", cid.absoluteFilePath("assets"));
     wd.cd("linux");
     foreach (auto fn, wd.entryList(QDir::Files)) {
@@ -305,8 +307,6 @@ void MultiBound::Util::openSBUpdateCI() {
     cid.remove("client.tar"); // clean up internal subarchive
 #endif
     f.remove(); // clean up downloaded archive
-
-    updateStatus("");
 
 
 
