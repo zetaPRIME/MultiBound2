@@ -231,7 +231,7 @@ void MultiBound::Util::openSBUpdateCI() {
         QMessageBox::critical(nullptr, "", "No matching artifacts found.");
         return;
     } else {
-        auto res = QMessageBox::question(nullptr, "", QString("Build #%1 (%2): %3").arg(QString("%1").arg(ri["run_number"].toInt()), ri["head_sha"].toString().left(7), ri["display_title"].toString()), "Install", "Cancel");
+        auto res = QMessageBox::question(nullptr, "", QString("Build #%1 (%2): %3").arg(ri["run_number"].toVariant().toString(), ri["head_sha"].toString().left(7), ri["display_title"].toString()), "Install", "Cancel");
         qDebug() << "prompt returned" << res;
         if (res != 0) return;
     }
@@ -247,7 +247,9 @@ void MultiBound::Util::openSBUpdateCI() {
     QFile f(cid.absoluteFilePath(fn));
     f.open(QFile::WriteOnly);
 
-    QNetworkRequest req(ai["archive_download_url"].toString()); // prepare for actual download
+    // we need to take a slight detour here; assemble our download url
+    auto lnk = QString("https://nightly.link/OpenStarbound/OpenStarbound/suites/%1/artifacts/%2").arg(ri["check_suite_id"].toVariant().toString()).arg(ai["id"].toVariant().toString());
+    QNetworkRequest req(lnk); // prepare for actual download
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy); // allow redirects
     reply = net.get(req);
     QObject::connect(reply, &QNetworkReply::downloadProgress, &ev, [](auto c, auto t) {
@@ -276,10 +278,9 @@ void MultiBound::Util::openSBUpdateCI() {
     updateStatus("");
     wd.cd("win")
     foreach (auto fn, wd.entryList(QDir::Files)) {
-        wd.rename(fn, cid.filePath(fn));
+        wd.rename(fn, cid.absoluteFilePath(fn));
     }
-    wd.cdUp();
-    wd.rmdir("win");
+    cid.rmdir("win");
     // super easy
 #else // unix, probably linux
     // extract with unzip, untar, move assets out, move everything in linux to root, then nuke client_distribution
