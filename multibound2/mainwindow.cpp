@@ -179,6 +179,7 @@ void MainWindow::showEvent(QShowEvent* e) {
     }
 }
 
+bool MainWindow::isInteractive() { return ui->centralWidget->isEnabled(); }
 void MainWindow::setInteractive(bool b) {
     ui->menuBar->setEnabled(b);
     ui->centralWidget->setEnabled(b);
@@ -201,6 +202,12 @@ void MainWindow::checkUpdates(bool osbOnly) {
         Util::openSBCheckForUpdates();
         setInteractive(true);
     }
+}
+
+void MainWindow::updateCIBuild() {
+    setInteractive(false);
+    Util::openSBUpdateCI();
+    setInteractive(true);
 }
 
 void MainWindow::refresh(const QString& focusPath) {

@@ -24,6 +24,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
 
     // set up initial values
     ui->openSBEnabled->setChecked(Config::openSBEnabled);
+    ui->openSBUseCIBuild->setChecked(Config::openSBUseCIBuild);
     ui->openSBUseDevBranch->setChecked(Config::openSBUseDevBranch);
 
     ui->steamcmdEnabled->setChecked(Config::steamcmdEnabled);
@@ -36,6 +37,14 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     connect(ui->steamcmdEnabled, &QCheckBox::stateChanged, this, [this] {
         ui->steamcmdUpdateSteamMods->setEnabled(ui->steamcmdEnabled->isChecked());
     });
+
+    connect(ui->btnUpdateCI, &QPushButton::clicked, this, [this] {
+        if (!MainWindow::instance->isInteractive()) return; // guard
+        QPointer<QPushButton> btn = ui->btnUpdateCI;
+        btn->setEnabled(false);
+        MainWindow::instance->updateCIBuild();
+        if (btn) btn->setEnabled(true);
+    });
 }
 
 SettingsWindow::~SettingsWindow() {
@@ -46,6 +55,7 @@ void SettingsWindow::apply() {
     bool enablingOSB = ui->openSBEnabled->isChecked() && !Config::openSBEnabled;
 
     Config::openSBEnabled = ui->openSBEnabled->isChecked();
+    Config::openSBUseCIBuild = ui->openSBUseCIBuild->isChecked();
     Config::openSBUseDevBranch = ui->openSBUseDevBranch->isChecked();
 
     Config::steamcmdEnabled = ui->steamcmdEnabled->isChecked();

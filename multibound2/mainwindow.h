@@ -23,9 +23,11 @@ namespace MultiBound {
 
         void showEvent(QShowEvent*) override;
 
+        bool isInteractive();
         void setInteractive(bool);
 
         void checkUpdates(bool osbOnly = false);
+        void updateCIBuild();
 
         void refresh(const QString& focusPath = { });
         void launch(Instance* inst = nullptr);
