@@ -249,7 +249,7 @@ void MultiBound::Util::openSBUpdateCI() {
     f.open(QFile::WriteOnly);
 
     // we need to take a slight detour here; assemble our download url
-    auto lnk = QString("https://nightly.link/OpenStarbound/OpenStarbound/suites/%1/artifacts/%2").arg(ri["check_suite_id"].toVariant().toString()).arg(ai["id"].toVariant().toString());
+    auto lnk = QString("https://nightly.link/OpenStarbound/OpenStarbound/suites/%1/artifacts/%2").arg(ri["check_suite_id"].toVariant().toString(), ai["id"].toVariant().toString());
     QNetworkRequest req(lnk); // prepare for actual download
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy); // allow redirects
     reply = net.get(req);
