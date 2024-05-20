@@ -276,7 +276,9 @@ void MultiBound::Util::openSBUpdateCI() {
     // extract using powershell, move everything in /win/ to /, remove /win/
     ps.start("powershell", QStringList() << "Expand-Archive" << "-DestinationPath" << cid.absolutePath() << "-LiteralPath" << f.fileName());
     ev.exec();
+
     updateStatus("");
+    cid.rename("assets", "data"); // match release layout
     wd.cd("win");
     foreach (auto fn, wd.entryList(QDir::Files)) {
         wd.rename(fn, cid.absoluteFilePath(fn));
@@ -293,7 +295,7 @@ void MultiBound::Util::openSBUpdateCI() {
 
     updateStatus("");
     if (!wd.cd("client_distribution")) return; // download failed for some reason or another
-    wd.rename("assets", cid.absoluteFilePath("assets"));
+    wd.rename("assets", cid.absoluteFilePath("data"));
     wd.cd("linux");
     foreach (auto fi, wd.entryInfoList(QDir::Files)) {
         auto fn = fi.fileName();
