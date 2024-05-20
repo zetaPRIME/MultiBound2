@@ -164,10 +164,11 @@ void MultiBound::Util::openSBUpdate() {
     ps.start("unzip", QStringList() << f.fileName() << "-d" << osbd.absolutePath());
     ev.exec();
 
-    foreach (auto fn, osbd.entryList(QDir::Files)) {
-        if (!fn.contains(".")) { // no extension, assume it's a binary and fix permissions as such
-            QFile ex(osbd.absoluteFilePath(fn));
-            ex.setPermissions(ex.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
+    foreach (auto fi, osbd.entryInfoList(QDir::Files)) { // fix permissions
+        auto ext = fi.suffix();
+        QFile ff(fi.absoluteFilePath());
+        if (ext == "" or ext == "sh") { // assume no extension is executable
+            ff.setPermissions(ff.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
         }
     }
 #endif
