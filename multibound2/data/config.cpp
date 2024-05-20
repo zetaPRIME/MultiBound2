@@ -30,6 +30,7 @@ bool MultiBound::Config::steamcmdEnabled = true;
 bool MultiBound::Config::steamcmdUpdateSteamMods = true;
 
 bool MultiBound::Config::openSBEnabled = true;
+bool MultiBound::Config::openSBUseCIBuild = false;
 bool MultiBound::Config::openSBUseDevBranch = false;
 bool MultiBound::Config::openSBOffered = false;
 QString MultiBound::Config::openSBRoot;
@@ -92,6 +93,7 @@ void MultiBound::Config::load() {
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
 
         openSBEnabled = cfg["openSBEnabled"].toBool(openSBEnabled);
+        openSBUseCIBuild = cfg["openSBUseCIBuild"].toBool(openSBUseCIBuild);
         openSBUseDevBranch = cfg["openSBUseDevBranch"].toBool(openSBUseDevBranch);
         openSBOffered = cfg["openSBOffered"].toBool(openSBOffered);
     }
@@ -152,6 +154,7 @@ void MultiBound::Config::save() {
     cfg["steamcmdUpdateSteamMods"] = steamcmdUpdateSteamMods;
 
     cfg["openSBEnabled"] = openSBEnabled;
+    cfg["openSBUseCIBuild"] = openSBUseCIBuild;
     cfg["openSBUseDevBranch"] = openSBUseDevBranch;
     cfg["openSBOffered"] = openSBOffered;
 

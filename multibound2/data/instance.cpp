@@ -70,7 +70,9 @@ bool Instance::launch() {
     const auto osbBinary = qs("starbound");
 #endif
     bool useOSB = Config::openSBEnabled;
-    auto osbRoot = (Config::openSBUseDevBranch && QDir(Config::openSBDevRoot).exists(osbBinary)) ? Config::openSBDevRoot : Config::openSBRoot;
+    auto osbRoot = Config::openSBRoot;
+    if (Config::openSBUseCIBuild && QDir(Config::openSBCIRoot).exists(osbBinary)) osbRoot = Config::openSBCIRoot;
+    if (Config::openSBUseDevBranch && QDir(Config::openSBDevRoot).exists(osbBinary)) osbRoot = Config::openSBDevRoot;
     if (!QDir(osbRoot).exists(osbBinary)) useOSB = false;
 
     {
@@ -128,7 +130,7 @@ bool Instance::launch() {
             }
         }
 
-        for (auto id : workshop) if (!workshopExclude.contains(id)) assets.append(evaluatePath(qs("workshop:/") + id));
+        for (auto& id : workshop) if (!workshopExclude.contains(id)) assets.append(evaluatePath(qs("workshop:/") + id));
 
         sbinit["assetDirectories"] = assets;
 
