@@ -277,7 +277,7 @@ void MultiBound::Util::openSBUpdateCI() {
     ps.start("powershell", QStringList() << "Expand-Archive" << "-DestinationPath" << cid.absolutePath() << "-LiteralPath" << f.fileName());
     ev.exec();
     updateStatus("");
-    wd.cd("win")
+    wd.cd("win");
     foreach (auto fn, wd.entryList(QDir::Files)) {
         wd.rename(fn, cid.absoluteFilePath(fn));
     }
