@@ -20,7 +20,7 @@
 
 #include <QVersionNumber>
 
-const QString MultiBound::Util::version = qs("v0.6.0");
+const QString MultiBound::Util::version = qs("v0.6.1");
 
 namespace { // clazy:excludeall=non-pod-global-static
     const auto releasesUrl = qs("https://api.github.com/repos/zetaPRIME/MultiBound2/releases");
