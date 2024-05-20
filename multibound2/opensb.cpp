@@ -291,20 +291,21 @@ void MultiBound::Util::openSBUpdateCI() {
     ev.exec();
 
     updateStatus("");
-    return; // don't do the risky part until we figure out the download
     if (!wd.cd("client_distribution")) return; // download failed for some reason or another
     wd.rename("assets", cid.absoluteFilePath("assets"));
     wd.cd("linux");
-    foreach (auto fn, wd.entryList(QDir::Files)) {
-        if (!fn.contains(".")) { // no extension, assume it's a binary and fix permissions as such
-            QFile ex(wd.absoluteFilePath(fn));
-            ex.setPermissions(ex.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
+    foreach (auto fi, wd.entryInfoList(QDir::Files)) {
+        auto fn = fi.fileName();
+        auto ext = fi.suffix();
+        QFile ff(fi.absoluteFilePath());
+        if (ext == "" or ext == "sh") { // assume no extension is executable
+            ff.setPermissions(ff.permissions() | QFile::ExeOwner | QFile::ExeGroup | QFile::ExeOther);
         }
-        wd.rename(fn, cid.absoluteFilePath(fn));
+        ff.rename(cid.absoluteFilePath(fn));
     }
-    // nuke
-    wd.cdUp();
-    //wd.removeRecursively();
+    // nuke leftovers
+    wd.setPath(cid.absoluteFilePath("client_distribution"));
+    if (wd.exists()) wd.removeRecursively();
     cid.remove("client.tar"); // clean up internal subarchive
 #endif
     f.remove(); // clean up downloaded archive
