@@ -89,7 +89,7 @@ instead of the installation managed by MultiBound.
    <item>
     <widget class="QGroupBox" name="groupSteamcmd">
      <property name="title">
-      <string>Steam Workshop integration (broken?)</string>
+      <string>Steam Workshop integration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">

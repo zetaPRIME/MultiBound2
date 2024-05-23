@@ -222,7 +222,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QObject::connect(scp, &QProcess::readyRead, ctx.get(), [wsc, &wsp, &ctx] { // clazy:exclude=lambda-in-connect
         while (scp->canReadLine()) {
             QString l = scp->readLine();
-            qDebug() << l;
+            //qDebug() << l;
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));
@@ -248,8 +248,8 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
         ev.exec();
     }
 
-    if (!ctx) { // missing decryption key
-        QMessageBox::critical(nullptr, " ", "Failed to download one or more mods. This may be due to Steam maintenance, or due to a missing decryption key. (If you have the Steam version of Starbound, you should have this if your machine has ever downloaded a Workshop mod.)");
+    if (!ctx) { // download failure occurred
+        QMessageBox::critical(nullptr, " ", "Failed to download one or more mods. This may be due to Steam maintenance, or due to a network or steamcmd error. Please try again in a few minutes.");
     }
 }
 
