@@ -116,7 +116,7 @@ bool MultiBound::Util::initSteamCmd() {
         scConfigPath = Util::splicePath(scd.absolutePath(), "/config/");
     }
 #endif
-    if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
+    /*if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
         QDir cpd(scConfigPath);
         //qDebug() << cpd.absolutePath();
         //cpd.cdUp();
@@ -137,7 +137,7 @@ bool MultiBound::Util::initSteamCmd() {
         tyti::vdf::write(ofs, doc);
         ofs.flush();
         ofs.close();
-    }
+    }*/
     scFail = false;
     return true;
 }
