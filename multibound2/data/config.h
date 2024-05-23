@@ -14,8 +14,6 @@ namespace MultiBound {
         extern QString steamcmdDLRoot;
         extern QString steamcmdWorkshopRoot;
 
-        extern QString workshopDecryptionKey;
-
         extern bool steamcmdEnabled;
         extern bool steamcmdUpdateSteamMods;
 

@@ -3,8 +3,6 @@
 #include "data/config.h"
 #include "data/instance.h"
 
-#include "inclib/vdf_parser.hpp"
-
 #include <QJsonDocument>
 #include <QJsonArray>
 
@@ -116,28 +114,7 @@ bool MultiBound::Util::initSteamCmd() {
         scConfigPath = Util::splicePath(scd.absolutePath(), "/config/");
     }
 #endif
-    /*if (!scConfigPath.isEmpty() && !Config::workshopDecryptionKey.isEmpty()) {
-        QDir cpd(scConfigPath);
-        //qDebug() << cpd.absolutePath();
-        //cpd.cdUp();
-        cpd.mkpath(".");
 
-        auto fp = cpd.absoluteFilePath("config.vdf");
-        { QFile f(fp); f.open(QFile::ReadWrite); } // ensure the file exists
-        std::ifstream ifs(fp.toStdString());
-        auto doc = tyti::vdf::read(ifs);
-        ifs.close();
-
-        doc.set_name("InstallConfigStore"); // ensure root name is correct
-
-        auto depot = Util::vdfPath(&doc, QStringList() << "Software" << "Valve" << "Steam" << "depots" << "211820", true);
-        depot->add_attribute("DecryptionKey", Config::workshopDecryptionKey.toStdString());
-
-        std::ofstream ofs(fp.toStdString());
-        tyti::vdf::write(ofs, doc);
-        ofs.flush();
-        ofs.close();
-    }*/
     scFail = false;
     return true;
 }

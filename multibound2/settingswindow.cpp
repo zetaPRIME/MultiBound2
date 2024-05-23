@@ -30,8 +30,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     ui->steamcmdEnabled->setChecked(Config::steamcmdEnabled);
     ui->steamcmdUpdateSteamMods->setChecked(Config::steamcmdUpdateSteamMods);
 
-    //ui->workshopDecryptionKey->setText(Config::workshopDecryptionKey);
-
     // and some interactions
     ui->steamcmdUpdateSteamMods->setEnabled(ui->steamcmdEnabled->isChecked());
     connect(ui->steamcmdEnabled, &QCheckBox::stateChanged, this, [this] {
@@ -60,8 +58,6 @@ void SettingsWindow::apply() {
 
     Config::steamcmdEnabled = ui->steamcmdEnabled->isChecked();
     Config::steamcmdUpdateSteamMods = ui->steamcmdUpdateSteamMods->isChecked();
-
-    //Config::workshopDecryptionKey = ui->workshopDecryptionKey->text().toLower().trimmed();
 
     Config::save();
     emit MainWindow::instance->refreshSettings();
