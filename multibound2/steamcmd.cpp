@@ -43,8 +43,6 @@ namespace { // clazy:excludeall=non-pod-global-static
 }
 
 bool MultiBound::Util::initSteamCmd() {
-    return false; // we're not supporting this until something is figured out
-
     if (!Config::steamcmdEnabled) return false; // don't bother if it's disabled
     if (scp) {
         if (scFail) return false; // could not init steamcmd
@@ -224,7 +222,7 @@ void MultiBound::Util::updateMods(MultiBound::Instance* inst) {
     QObject::connect(scp, &QProcess::readyRead, ctx.get(), [wsc, &wsp, &ctx] { // clazy:exclude=lambda-in-connect
         while (scp->canReadLine()) {
             QString l = scp->readLine();
-            //qDebug() << l;
+            qDebug() << l;
             if (l.startsWith(qs("Success. Downloaded item"))) {
                 wsp++;
                 updateStatus(qs("%1 (%2/%3)").arg(updMsg).arg(wsp).arg(wsc));

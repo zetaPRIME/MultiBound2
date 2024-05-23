@@ -88,7 +88,7 @@ void MultiBound::Config::load() {
         instanceRoot = cfg["instanceRoot"].toString(instanceRoot);
         steamcmdDLRoot = cfg["steamcmdRoot"].toString(steamcmdDLRoot);
 
-        workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey).toLower().trimmed();
+        //workshopDecryptionKey = cfg["workshopDecryptionKey"].toString(workshopDecryptionKey).toLower().trimmed();
 
         steamcmdUpdateSteamMods = cfg["steamcmdUpdateSteamMods"].toBool(steamcmdUpdateSteamMods);
 
@@ -111,7 +111,7 @@ void MultiBound::Config::load() {
 
     verify();
 
-    if (workshopDecryptionKey.isEmpty()) { // attempt to pull key from Steam
+    if (false && workshopDecryptionKey.isEmpty()) { // attempt to pull key from Steam
         QString vdfLoc;
 
 #if defined(Q_OS_WIN)
