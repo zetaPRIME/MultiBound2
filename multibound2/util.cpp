@@ -1,7 +1,5 @@
 #include "util.h"
 
-#include "inclib/vdf_parser.hpp"
-
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
