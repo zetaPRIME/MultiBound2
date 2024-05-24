@@ -33,8 +33,6 @@ QString MultiBound::Config::openSBRoot;
 QString MultiBound::Config::openSBCIRoot;
 QString MultiBound::Config::openSBDevRoot;
 
-namespace vdf = tyti::vdf;
-
 namespace {
     [[maybe_unused]] inline bool isX64() { return QSysInfo::currentCpuArchitecture().contains(QLatin1String("64")); }
 }

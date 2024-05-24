@@ -8,8 +8,6 @@
 
 #include <QDebug>
 
-namespace vdf = tyti::vdf;
-
 std::function<void(QString)> MultiBound::Util::updateStatus;
 
 QJsonDocument MultiBound::Util::loadJson(const QString& path) {
@@ -35,20 +33,4 @@ QJsonDocument MultiBound::Util::parseJson(const QByteArray data) {
 
     if (err.error != QJsonParseError::NoError) qDebug() << err.errorString();
     return json;
-}
-
-vdf::basic_object<char>* MultiBound::Util::vdfPath(vdf::basic_object<char>* obj, QStringList path, bool create) {
-    auto cur = obj;
-    for (auto& tk : path) {
-        auto tks = tk.toStdString();
-        auto next = cur->childs[tks];
-        if (!next) {
-            if (!create) return nullptr;
-            next = std::make_shared<vdf::basic_object<char>>();
-            next->name = tks;
-            cur->childs[tks] = next;
-        }
-        cur = next.get();
-    }
-    return cur;
 }

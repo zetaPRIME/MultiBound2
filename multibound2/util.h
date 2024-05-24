@@ -9,8 +9,6 @@
 
 class QJsonDocument;
 
-namespace tyti::vdf { template<typename T>class basic_object; }
-
 namespace MultiBound {
     class Instance;
     namespace Util {
@@ -21,8 +19,6 @@ namespace MultiBound {
 
         QJsonDocument loadJson(const QString& path);
         QJsonDocument parseJson(const QByteArray data);
-
-        tyti::vdf::basic_object<char>* vdfPath(tyti::vdf::basic_object<char>* obj, QStringList path, bool create = false);
 
         inline QString workshopLinkFromId(const QString& id) { return qs("https://steamcommunity.com/sharedfiles/filedetails/?id=%1").arg(id); }
         inline QString workshopIdFromLink(const QString& link) {
