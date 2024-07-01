@@ -174,6 +174,14 @@ void MultiBound::Util::openSBUpdate() {
 #endif
 
     osbd.remove(fn); // clean up the zip after we're done
+
+    if (auto f = QFile(osbd.absoluteFilePath("steam_appid.txt")); true) { // ensure appid file
+        f.open(QFile::WriteOnly);
+        f.write("211820");
+        f.flush();
+        f.close();
+    }
+
     updateStatus("");
 
     // finally, write out the release info
@@ -313,7 +321,12 @@ void MultiBound::Util::openSBUpdateCI() {
 #endif
     f.remove(); // clean up downloaded archive
 
-
+    if (auto f = QFile(cid.absoluteFilePath("steam_appid.txt")); true) { // ensure appid file
+        f.open(QFile::WriteOnly);
+        f.write("211820");
+        f.flush();
+        f.close();
+    }
 
 
 
