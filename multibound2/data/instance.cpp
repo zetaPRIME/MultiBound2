@@ -99,6 +99,8 @@ bool Instance::launch() {
 
         sbinit["defaultConfiguration"] = defaultCfg;
 
+        sbinit["includeUGC"] = false; // openSB: don't pull in everything from Steam
+
         // storage directory
         if (auto s = json["savePath"]; s.isString()) sbinit["storageDirectory"] = evaluatePath(s.toString());
         else sbinit["storageDirectory"] = evaluatePath("inst:/storage/");
